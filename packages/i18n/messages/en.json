@@ -137,7 +137,8 @@
     "trading": "Trading / distribution",
     "manufacturing": "Manufacturing",
     "retail": "Retail shop",
-    "services": "Services"
+    "services": "Services",
+    "tiles": "Tiles showroom and trading"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -1382,7 +1383,7 @@
     "title": "Items",
     "subtitle": "Goods you stock and services you buy or sell, with HSN/SAC and GST rate.",
     "new": "New item",
-    "name": "Item name",
+    "name": "Tile / product name",
     "kind": "Type",
     "goods": "Goods",
     "service": "Service",
@@ -1396,8 +1397,8 @@
     "mrp": "MRP",
     "reorderLevel": "Reorder level",
     "reorderQty": "Reorder quantity",
-    "trackBatches": "Track batch numbers and expiry",
-    "inStock": "In stock",
+    "trackBatches": "Track shade / batch numbers",
+    "inStock": "Stock (product unit)",
     "empty": "No items yet.",
     "errors": {
       "invalid_hsn": "An HSN code has 4, 6 or 8 digits.",

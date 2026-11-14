@@ -19,6 +19,9 @@ export async function ensureInventory(tx: Tx, tenantId: string, companyId: strin
     // Parallel first requests may both get here; the later one skips what already exists.
     await tx.insert(tables.uoms).values(UQC.map((u) => ({ tenantId, companyId, code: u.code, name: u.name, nameHi: u.nameHi, decimals: u.decimals }))).onConflictDoNothing();
   }
+  // Older businesses may have a partial unit catalog. Tile stock still needs BOX.
+  const box = UQC.find((u) => u.code === "BOX");
+  if (box) await tx.insert(tables.uoms).values({ tenantId, companyId, code: box.code, name: box.name, nameHi: box.nameHi, decimals: box.decimals }).onConflictDoNothing();
   const [anyWh] = await tx.select({ id: tables.warehouses.id }).from(tables.warehouses).where(eq(tables.warehouses.companyId, companyId)).limit(1);
   if (!anyWh) await tx.insert(tables.warehouses).values({ tenantId, companyId, name: "Main store", isDefault: true }).onConflictDoNothing();
 }

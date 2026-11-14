@@ -61,7 +61,7 @@ export async function createBusiness(tx: Tx, userId: string, input: BusinessInpu
 
   const tenantId = crypto.randomUUID();
   await tx.execute(sql`select set_config('app.tenant_id', ${tenantId}, true)`);
-  await tx.insert(tables.tenants).values({ id: tenantId, name: input.businessName, industry: input.industry ?? "general" });
+  await tx.insert(tables.tenants).values({ id: tenantId, name: input.businessName, industry: input.industry ?? "tiles" });
 
   const roleRows = await tx
     .insert(tables.roles)

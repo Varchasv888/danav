@@ -241,6 +241,7 @@ export async function gstRoutes(app: FastifyInstance, { db }: { db: Db }) {
       rows: z.array(z.object({
         name: z.string().max(150), hsn: Opt, gstRate: Opt, unit: Opt, kind: z.enum(["goods", "service"]).optional(),
         purchaseRate: Opt, saleRate: Opt, openingQty: Opt, openingRate: Opt,
+        sku: z.string().max(40).optional(), size: Opt, tileBrand: z.string().max(100).optional(), tileFinish: z.string().max(100).optional(),
       })).min(1).max(20000),
     }).parse(req.body);
     return withTenant(db, auth.tenantId, (tx) => importItems(tx, actor(auth, req.ip), body.rows, body.dryRun));

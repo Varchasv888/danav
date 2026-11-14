@@ -290,6 +290,7 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
 
   return (
     <form onSubmit={submit} onKeyDown={onKey} data-density="compact" className="flex flex-col gap-2 lg:min-h-0 lg:flex-1">
+      <p className="text-xs text-muted">For tile products, enter quantities in boxes and rates per box. The selected product unit is used for stock and billing; tile dimensions do not change quantities.</p>
       <div className="flex min-h-0 flex-col rounded-lg border border-border bg-surface shadow-[0_1px_3px_0_rgb(15_23_42/0.06)] lg:flex-1">
         {/* Header strip: what this is, its number, the dates, the place of supply and the rate basis. */}
         <div className="grid shrink-0 grid-cols-2 items-end gap-x-3 gap-y-2 border-b border-border bg-surface-3 px-3 py-2 md:grid-cols-4 xl:grid-cols-[1.1fr_1fr_1fr_1.4fr_1fr_auto_auto]">

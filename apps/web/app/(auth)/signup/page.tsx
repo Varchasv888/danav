@@ -9,7 +9,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { Alert, Button, Field, Input, Select } from "@/components/ui";
 import { ApiError, api } from "@/lib/client-api";
 
-const INDUSTRIES = ["apparel", "general", "trading", "manufacturing", "retail", "services"] as const;
+const INDUSTRIES = ["tiles", "apparel", "general", "trading", "manufacturing", "retail", "services"] as const;
 
 export default function SignupPage() {
   const t = useTranslations();
@@ -85,7 +85,7 @@ export default function SignupPage() {
             </Select>
           </Field>
           <Field label={t("auth.industry")} htmlFor="industry">
-            <Select id="industry" name="industry" defaultValue="apparel">
+            <Select id="industry" name="industry" defaultValue="tiles">
               {INDUSTRIES.map((i) => <option key={i} value={i}>{t(`industry.${i}`)}</option>)}
             </Select>
           </Field>

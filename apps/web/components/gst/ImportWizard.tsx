@@ -10,70 +10,18 @@ import { Alert, Button, Card } from "../ui";
 type Kind = "parties" | "items" | "opening" | "tally";
 interface RowResult { row: number; name: string; status: "create" | "update" | "exists" | "error"; error?: string }
 
-/** RFC 4180 CSV: quoted fields, doubled quotes, commas and newlines inside quotes, CRLF. */
-export function parseCsv(text: string): string[][] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let field = "";
-  let quoted = false;
-  const src = text.replace(/^﻿/, ""); // Excel adds a byte-order mark
-  for (let i = 0; i < src.length; i++) {
-    const ch = src[i]!;
-    if (quoted) {
-      if (ch === '"' && src[i + 1] === '"') { field += '"'; i++; }
-      else if (ch === '"') quoted = false;
-      else field += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ",") { row.push(field); field = ""; }
-    else if (ch === "\n" || ch === "\r") {
-      if (ch === "\r" && src[i + 1] === "\n") i++;
-      row.push(field); field = "";
-      if (row.some((c) => c.trim())) rows.push(row);
-      row = [];
-    } else field += ch;
-  }
-  row.push(field);
-  if (row.some((c) => c.trim())) rows.push(row);
-  return rows;
-}
-
-const COLUMNS: Record<"parties" | "items" | "opening", { header: string; key: string }[]> = {
-  opening: [{ header: "name", key: "name" }, { header: "debit", key: "debit" }, { header: "credit", key: "credit" }],
-  parties: [
-    { header: "name", key: "name" }, { header: "type", key: "type" }, { header: "gstin", key: "gstin" }, { header: "state_code", key: "stateCode" },
-    { header: "phone", key: "phone" }, { header: "email", key: "email" }, { header: "opening_balance", key: "openingBalance" }, { header: "credit_days", key: "creditDays" },
-    { header: "address", key: "address" }, { header: "city", key: "city" }, { header: "pincode", key: "pincode" },
-  ],
-  items: [
-    { header: "name", key: "name" }, { header: "hsn", key: "hsn" }, { header: "gst_rate", key: "gstRate" }, { header: "unit", key: "unit" }, { header: "kind", key: "kind" },
-    { header: "purchase_rate", key: "purchaseRate" }, { header: "sale_rate", key: "saleRate" }, { header: "opening_qty", key: "openingQty" }, { header: "opening_rate", key: "openingRate" },
-  ],
-};
+import { parseCsv, toRecords } from "@/lib/import-csv";
+export { parseCsv } from "@/lib/import-csv";
 const SAMPLES = {
   opening: "name,debit,credit\nSharma Stores,12500,\nGupta Suppliers,,8000\nCash,4500,\n",
   parties: "name,type,gstin,state_code,phone,email,opening_balance,credit_days,address,city,pincode\nSharma Stores,customer,27AAPFU0939F1ZV,,9876543210,,12500,30,12 Market Road,Pune,411001\nGupta Suppliers,supplier,,09,,,8000,,,,\n",
-  items: "name,hsn,gst_rate,unit,kind,purchase_rate,sale_rate,opening_qty,opening_rate\nBasmati Rice 5kg,1006,5,bag,goods,420,520,40,400\nDelivery charges,996812,18,,service,,50,,\n",
+  items: "SKU,Brand,Product_Name,Size,Finish,UOM,Quantity,purchase_rate,sale_rate,opening_rate,gst_rate\nVAL-MAX-GOLD-4X2,Valenza,Max Gold,4x2,Glossy,Box,110,,,,\n",
 };
 
-/** Turns CSV rows into objects using the header row (case- and space-insensitive). */
-function toRecords(kind: "parties" | "items" | "opening", rows: string[][]) {
-  const [header, ...body] = rows;
-  if (!header) return [];
-  const norm = header.map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
-  return body.map((r) => {
-    const rec: Record<string, string> = {};
-    for (const col of COLUMNS[kind]) {
-      const idx = norm.indexOf(col.header);
-      const v = idx >= 0 ? (r[idx] ?? "").trim() : "";
-      if (v) rec[col.key] = kind === "parties" && col.key === "type" ? v.toLowerCase() : kind === "items" && col.key === "kind" ? v.toLowerCase() : v;
-    }
-    return rec;
-  });
-}
 
 export function ImportWizard() {
   const t = useTranslations();
-  const [kind, setKind] = useState<Kind>("parties");
+  const [kind, setKind] = useState<Kind>("items");
   const [payload, setPayload] = useState<unknown>(null);
   const [results, setResults] = useState<RowResult[] | null>(null);
   const [done, setDone] = useState(false);
@@ -100,11 +48,23 @@ export function ImportWizard() {
   }
 
   async function onFile(file: File) {
+    setResults(null);
+    setTotals(null);
+    setPayload(null);
+    setError(null);
+    try {
     const text = await file.text();
     const body = kind === "tally" ? { xml: text } : { rows: toRecords(kind, parseCsv(text)) };
+    if ("rows" in body && (!body.rows?.length || body.rows.some((r) => !r.name))) {
+      setError("The CSV must contain data rows and a name column (Product_Name is also accepted for items).");
+      return;
+    }
     setPayload(body);
     setDone(false);
     await send(true, body);
+    } catch {
+      setError("Could not read this file. Please choose a valid CSV or Tally XML file.");
+    }
   }
 
   const creatable = results?.filter((r) => r.status === "create" || r.status === "update").length ?? 0;
@@ -120,6 +80,7 @@ export function ImportWizard() {
         ))}
       </div>
       <Card>
+        {kind === "items" ? <p className="mb-4 text-sm text-muted">Inventory CSV columns Product_Name, UOM and Quantity are supported. Quantity becomes opening stock. Brand and Size are included in the product name; Brand, SKU, Size and Finish are also saved separately. All quantities and prices are per box. Missing prices and opening values default to 0; missing GST rates default to 18%. Review your tax rates and stock valuation before importing.</p> : null}
         {kind === "tally" ? <p className="mb-4 text-sm text-muted">{t("import.tallyHint")}</p> : (
           <button type="button" className="mb-4 inline-flex items-center gap-2 text-sm text-primary hover:underline" onClick={() => {
             const url = URL.createObjectURL(new Blob([SAMPLES[kind]], { type: "text/csv" }));

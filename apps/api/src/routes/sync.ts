@@ -261,6 +261,7 @@ async function loadPos(tx: Tx, ids: Map<string, string[]> | null, deviceId: stri
   if (!perms.has("sales.view")) return {};
   const itemIds = ids ? ids.get("item") ?? [] : null;
   const itemCols = {
+    tileBrand: tables.items.tileBrand, tileFinish: tables.items.tileFinish, size: tables.items.size,
     id: tables.items.id, companyId: tables.items.companyId, name: tables.items.name, nameHi: tables.items.nameHi, sku: tables.items.sku, barcode: tables.items.barcode,
     kind: tables.items.kind, hsn: tables.items.hsn, gstRate: tables.items.gstRate, gstSlab: tables.items.gstSlab, slabPieces: tables.items.slabPieces, cessRate: tables.items.cessRate, saleRate: tables.items.saleRate, mrp: tables.items.mrp,
     uom: tables.uoms.code, archived: tables.items.archived,

@@ -3,6 +3,7 @@ import { serverApi } from "./server-api";
 
 /** Master data the purchase and inventory screens need, fetched on the server. */
 export interface ItemOption {
+  tileBrand?: string | null; tileFinish?: string | null;
   id: string; name: string; nameHi: string | null; kind: "goods" | "service"; hsn: string | null; gstRate: string; cessRate: string;
   gstSlab?: string | null; slabPieces?: number;
   /** Other codes the item answers to (supplier barcodes, old labels, merged duplicates). */

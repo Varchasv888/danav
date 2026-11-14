@@ -22,7 +22,7 @@ export const tenants = pgTable("tenants", {
   id: id(),
   name: text("name").notNull(),
   plan: varchar("plan", { length: 20 }).notNull().default("free"),
-  industry: varchar("industry", { length: 30 }).notNull().default("general"),
+  industry: varchar("industry", { length: 30 }).notNull().default("tiles"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
   createdAt: createdAt(),
 });
@@ -474,6 +474,8 @@ export const items = pgTable("items", {
   companyId: uuid("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   nameHi: text("name_hi"),
+  tileBrand: text("tile_brand"),
+  tileFinish: text("tile_finish"),
   sku: varchar("sku", { length: 40 }),
   barcode: varchar("barcode", { length: 40 }),
   kind: varchar("kind", { length: 10 }).notNull().default("goods"), // goods | service

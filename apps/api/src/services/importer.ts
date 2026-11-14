@@ -20,6 +20,7 @@ export interface PartyRow {
   openingBalance?: string | undefined; creditDays?: string | undefined; address?: string | undefined; city?: string | undefined; pincode?: string | undefined;
 }
 export interface ItemRow {
+  sku?: string | undefined; size?: string | undefined; tileBrand?: string | undefined; tileFinish?: string | undefined;
   name: string; hsn?: string | undefined; gstRate?: string | undefined; unit?: string | undefined; kind?: "goods" | "service" | undefined;
   purchaseRate?: string | undefined; saleRate?: string | undefined; openingQty?: string | undefined; openingRate?: string | undefined;
 }
@@ -72,7 +73,9 @@ export async function importItems(tx: Tx, actor: Actor, rows: ItemRow[], dryRun:
   await ensureInventory(tx, actor.tenantId, company.id);
   const uoms = await tx.select().from(tables.uoms).where(eq(tables.uoms.companyId, company.id));
   const [wh] = await tx.select().from(tables.warehouses).where(and(eq(tables.warehouses.companyId, company.id), eq(tables.warehouses.isDefault, true)));
-  const existing = new Set((await tx.select({ name: tables.items.name }).from(tables.items).where(eq(tables.items.companyId, company.id))).map((a) => a.name.toLowerCase()));
+  const existingItems = await tx.select({ name: tables.items.name, sku: tables.items.sku }).from(tables.items).where(eq(tables.items.companyId, company.id));
+  const existing = new Set(existingItems.map((a) => a.name.toLowerCase()));
+  const skus = new Set(existingItems.map((a) => a.sku).filter(Boolean));
   const results: RowResult[] = [];
   const opening: { itemId: string; qty: string; rate: string }[] = [];
   const seen = new Set<string>();
@@ -83,23 +86,31 @@ export async function importItems(tx: Tx, actor: Actor, rows: ItemRow[], dryRun:
     const res = (status: RowResult["status"], error?: string) => results.push({ row: i + 1, name, status, ...(error ? { error } : {}) });
     if (!name) { res("error", "name_required"); continue; }
     if (existing.has(name.toLowerCase()) || seen.has(name.toLowerCase())) { res("exists"); continue; }
+    const sku = r.sku?.trim();
+    if (sku && skus.has(sku)) { res("exists"); continue; }
     const kind = r.kind === "service" ? "service" : "goods";
     const hsn = r.hsn?.trim() || null;
     if (hsn && checkHsn(hsn, kind)) { res("error", kind === "service" ? "invalid_sac" : "invalid_hsn"); continue; }
     const rate = cleanNum(r.gstRate)?.replace("%", "") ?? "18";
     if (!(GST_RATES as readonly string[]).includes(String(Number(rate)))) { res("error", "invalid_gst_rate"); continue; }
     const unitKey = (r.unit ?? "").trim().toLowerCase();
-    const code = unitAlias[unitKey] ?? (UQC.some((u) => u.code === unitKey.toUpperCase()) ? unitKey.toUpperCase() : kind === "service" ? "OTH" : unitKey ? null : "NOS");
+    const code = unitAlias[unitKey] ?? (UQC.some((u) => u.code === unitKey.toUpperCase()) ? unitKey.toUpperCase() : kind === "service" ? "OTH" : unitKey ? null : "BOX");
     const uom = uoms.find((u) => u.code === code);
     if (!uom) { res("error", "unknown_unit"); continue; }
+    const purchaseRate = cleanNum(r.purchaseRate);
+    const saleRate = cleanNum(r.saleRate);
+    if ([purchaseRate, saleRate].some((v) => v !== undefined && !/^\d+(\.\d{1,4})?$/.test(v))) { res("error", "invalid_rate"); continue; }
     const oq = cleanNum(r.openingQty);
     const orate = cleanNum(r.openingRate);
+    if (orate !== undefined && !/^\d+(\.\d{1,4})?$/.test(orate)) { res("error", "invalid_opening"); continue; }
     if (oq && (!/^\d+(\.\d{1,4})?$/.test(oq) || (orate !== undefined && !/^\d+(\.\d{1,4})?$/.test(orate)))) { res("error", "invalid_opening"); continue; }
     seen.add(name.toLowerCase());
     res("create");
+    if (sku) skus.add(sku);
     if (dryRun) continue;
     const [it] = await tx.insert(tables.items).values({
       tenantId: actor.tenantId, companyId: company.id, name, kind, hsn, gstRate: String(Number(rate)), uomId: uom.id,
+      sku: r.sku?.trim() || null, size: r.size?.trim() || null, tileBrand: r.tileBrand?.trim() || null, tileFinish: r.tileFinish?.trim() || null,
       purchaseRate: cleanNum(r.purchaseRate) ?? "0", saleRate: cleanNum(r.saleRate) ?? "0",
     }).returning({ id: tables.items.id });
     if (oq && dec(oq).gt(0) && kind === "goods") opening.push({ itemId: it!.id, qty: oq, rate: orate ?? cleanNum(r.purchaseRate) ?? "0" });

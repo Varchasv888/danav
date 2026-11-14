@@ -137,7 +137,8 @@
     "trading": "व्यापार / वितरण",
     "manufacturing": "उत्पादन",
     "retail": "किरकोळ दुकान",
-    "services": "सेवा"
+    "services": "सेवा",
+    "tiles": "Tiles showroom and trading"
   },
   "nav": {
     "dashboard": "डॅशबोर्ड",

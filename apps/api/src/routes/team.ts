@@ -299,7 +299,7 @@ export async function teamRoutes(app: FastifyInstance, { db, mailer }: { db: Db;
       businessName: z.string().trim().min(2).max(150),
       stateCode: z.string().refine(isValidStateCode, "invalid_state"),
       gstin: z.string().trim().max(15).optional().transform((v) => (v ? v : undefined)),
-      industry: z.enum(["general", "apparel", "trading", "manufacturing", "retail", "services"]).optional(),
+      industry: z.enum(["tiles", "general", "apparel", "trading", "manufacturing", "retail", "services"]).optional(),
       booksFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "invalid_date").optional(),
     }).parse(req.body);
     const result = await db.transaction((tx) => createBusiness(tx, auth.user.id, body));

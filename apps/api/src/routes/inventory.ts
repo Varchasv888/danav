@@ -23,6 +23,9 @@ const CompanyQuery = z.object({ companyId: z.uuid().optional() });
 const today = () => businessDate();
 
 const ItemBody = z.object({
+  tileBrand: z.string().trim().max(100).nullish(),
+  tileFinish: z.string().trim().max(100).nullish(),
+  size: z.string().trim().max(100).nullish(),
   name: z.string().trim().min(1).max(150),
   nameHi: z.string().trim().max(150).nullish(),
   sku: z.string().trim().max(40).nullish(),

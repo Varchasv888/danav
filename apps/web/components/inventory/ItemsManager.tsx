@@ -24,7 +24,7 @@ export function ItemsManager({ items, uoms, canCreate, canEdit }: { items: Item[
   const [dirty, setDirty] = useState(false);
   const closeDrawer = () => { setEditing(null); setDirty(false); };
   const q = query.trim().toLowerCase();
-  const visible = items.filter((i) => !q || i.name.toLowerCase().includes(q) || (i.nameHi ?? "").includes(q) || (i.hsn ?? "").includes(q) || (i.sku ?? "").toLowerCase().includes(q));
+  const visible = items.filter((i) => !q || [i.tileBrand, i.tileFinish, i.size].some((v) => v?.toLowerCase().includes(q)) || i.name.toLowerCase().includes(q) || (i.nameHi ?? "").includes(q) || (i.hsn ?? "").includes(q) || (i.sku ?? "").toLowerCase().includes(q));
 
   return (
     <div className="flex flex-col gap-6">
@@ -60,6 +60,7 @@ export function ItemsManager({ items, uoms, canCreate, canEdit }: { items: Item[
                     <Link href={`/inventory/items/${i.id}`} className="font-medium hover:text-primary hover:underline">{localName(i, locale)}</Link>
                     {i.kind === "service" ? <span className="ml-2 rounded bg-surface-2 px-1.5 text-xs text-muted">{t("items.service")}</span> : null}
                     {i.archived ? <span className="ml-2 text-xs text-muted">({t("common.archived")})</span> : null}
+                    {i.tileBrand || i.size || i.tileFinish ? <span className="block text-xs text-muted">{[i.tileBrand, i.size ? `${i.size} ft` : null, i.tileFinish].filter(Boolean).join(" ? ")}</span> : null}
                     {i.sku ? <span className="block font-mono text-xs text-muted">{i.sku}</span> : null}
                   </td>
                   <td className="px-5 py-2.5 font-mono text-xs">{i.hsn}</td>
@@ -99,6 +100,7 @@ function ItemForm({ item, uoms, onDirty, onDone }: { item: Item | null; uoms: Uo
     const s = (k: string) => ((f.get(k) as string | null) ?? "").trim();
     const opt = (k: string) => s(k) || null;
     const body = {
+      tileBrand: opt("tileBrand") ?? null, tileFinish: opt("tileFinish") ?? null, size: opt("size") ?? null,
       name: s("name"), nameHi: opt("nameHi"), sku: opt("sku"), barcode: opt("barcode"), hsn: opt("hsn"), gstRate: slab ? "5" : s("gstRate"), uomId: s("uomId"),
       gstSlab: slab || null, slabPieces: slab ? Math.max(1, Number(f.get("slabPieces") || 1)) : 1,
       purchaseRate: s("purchaseRate") || "0", saleRate: s("saleRate") || "0", mrp: opt("mrp"),
@@ -124,6 +126,10 @@ function ItemForm({ item, uoms, onDirty, onDone }: { item: Item | null; uoms: Uo
       <form onSubmit={save} onChange={onDirty} className="grid gap-4 sm:grid-cols-2">
         {error ? <div className="sm:col-span-2"><Alert>{error}</Alert></div> : null}
         <Field label={t("items.name")} htmlFor="it-name"><Input id="it-name" name="name" defaultValue={item?.name} required autoFocus /></Field>
+        <Field label="Brand" htmlFor="it-brand"><Input id="it-brand" name="tileBrand" maxLength={100} defaultValue={item?.tileBrand ?? ""} /></Field>
+        <Field label="Tile dimensions (feet)" htmlFor="it-size"><Input id="it-size" name="size" maxLength={100} placeholder="4x2" defaultValue={item?.size ?? ""} /></Field>
+        <Field label="Finish" htmlFor="it-finish"><Input id="it-finish" name="tileFinish" maxLength={100} placeholder="Glossy, matt, polished" defaultValue={item?.tileFinish ?? ""} /></Field>
+        <p className="text-sm text-muted sm:col-span-2">Tile quantities and rates are per box. Dimensions describe each tile; they do not convert stock or prices to area. Keep different designs, sizes and finishes as separate products.</p>
         <Field label={t("items.kind")} htmlFor="it-kind">
           <Select id="it-kind" value={kind} onChange={(e) => setKind(e.target.value as "goods" | "service")} disabled={!!item}>
             <option value="goods">{t("items.goods")}</option>
@@ -135,8 +141,8 @@ function ItemForm({ item, uoms, onDirty, onDone }: { item: Item | null; uoms: Uo
           <Field label={t("items.gstSlab")} htmlFor="it-slab" hint={slab ? t(`items.slab.${slab}`) : undefined}>
             <Select id="it-slab" value={slab} onChange={(e) => setSlab(e.target.value)}>
               <option value="">{t("items.slabNone")}</option>
-              <option value="apparel">{t("items.slabApparel")}</option>
-              <option value="footwear">{t("items.slabFootwear")}</option>
+              {slab === "apparel" ? <option value="apparel">{t("items.slabApparel")}</option> : null}
+              {slab === "footwear" ? <option value="footwear">{t("items.slabFootwear")}</option> : null}
             </Select>
           </Field>
         ) : null}
@@ -152,12 +158,12 @@ function ItemForm({ item, uoms, onDirty, onDone }: { item: Item | null; uoms: Uo
           </Field>
         )}
         <Field label={t("items.uom")} htmlFor="it-uom">
-          <Select id="it-uom" name="uomId" defaultValue={item?.uomId ?? uoms.find((u) => u.code === (kind === "service" ? "OTH" : "NOS"))?.id}>
+          <Select id="it-uom" name="uomId" defaultValue={item?.uomId ?? uoms.find((u) => u.code === (kind === "service" ? "OTH" : "BOX"))?.id}>
             {uoms.map((u) => <option key={u.id} value={u.id}>{u.code} - {localName(u, locale)}</option>)}
           </Select>
         </Field>
-        <Field label={t("items.purchaseRate")} htmlFor="it-pr"><Input id="it-pr" name="purchaseRate" defaultValue={item && Number(item.purchaseRate) ? Number(item.purchaseRate) : ""} inputMode="decimal" className="num" /></Field>
-        <Field label={t("items.saleRate")} htmlFor="it-sr"><Input id="it-sr" name="saleRate" defaultValue={item && Number(item.saleRate) ? Number(item.saleRate) : ""} inputMode="decimal" className="num" /></Field>
+        <Field label={kind === "goods" ? "Purchase rate / box" : t("items.purchaseRate")} htmlFor="it-pr"><Input id="it-pr" name="purchaseRate" defaultValue={item && Number(item.purchaseRate) ? Number(item.purchaseRate) : ""} inputMode="decimal" className="num" /></Field>
+        <Field label={kind === "goods" ? "Sale rate / box" : t("items.saleRate")} htmlFor="it-sr"><Input id="it-sr" name="saleRate" defaultValue={item && Number(item.saleRate) ? Number(item.saleRate) : ""} inputMode="decimal" className="num" /></Field>
         <Field label={t("items.mrp")} htmlFor="it-mrp"><Input id="it-mrp" name="mrp" defaultValue={item?.mrp ? Number(item.mrp) : ""} inputMode="decimal" className="num" /></Field>
         <Field label={t("items.sku")} htmlFor="it-sku"><Input id="it-sku" name="sku" defaultValue={item?.sku ?? ""} maxLength={40} /></Field>
         <Field label={t("items.barcode")} htmlFor="it-bc"><Input id="it-bc" name="barcode" defaultValue={item?.barcode ?? ""} maxLength={40} /></Field>

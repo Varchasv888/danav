@@ -133,6 +133,7 @@ export function PurchaseForm({
 
   return (
     <form onKeyDown={voucherKeys} onSubmit={submit} data-density="compact" className="flex flex-col gap-3 lg:min-h-0 lg:flex-1">
+      <p className="text-xs text-muted">For tile products, enter quantities in boxes and rates per box. The selected product unit is used for stock and billing; tile dimensions do not change quantities.</p>
       {mode === "bill" && !initial ? <ReadBill onRead={applyRead} /> : null}
       <Card className="p-3 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
