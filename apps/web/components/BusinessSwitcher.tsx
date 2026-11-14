@@ -25,12 +25,17 @@ export function BusinessSwitcher({ current, tenants, tone = "plain" }: { current
   }, [open]);
 
   async function switchTo(tenantId: string) {
+    setError(null);
+    try {
     if (tenantId !== current) {
       await api("/auth/switch", { body: { tenantId } });
       router.push("/dashboard");
       router.refresh();
     }
     setOpen(false);
+    } catch {
+      setError(t("auth.errors.generic"));
+    }
   }
 
   async function create(e: React.FormEvent<HTMLFormElement>) {
@@ -60,6 +65,7 @@ export function BusinessSwitcher({ current, tenants, tone = "plain" }: { current
         <div className="absolute left-0 top-full z-40 mt-1 w-72 max-w-[90vw] rounded-lg border border-border-strong bg-surface p-1 text-text shadow-card">
           <p className="px-2 py-1 text-xs font-medium text-muted">{t("switcher.title")}</p>
           <ul>
+            {error && !adding ? <li><Alert>{error}</Alert></li> : null}
             {tenants.map((x) => (
               <li key={x.tenantId}>
                 <button type="button" onClick={() => switchTo(x.tenantId)} className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-surface-2">

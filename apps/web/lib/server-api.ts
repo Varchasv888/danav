@@ -8,6 +8,10 @@ export async function serverApi<T>(path: string): Promise<T> {
   const cookieHeader = (await cookies()).toString();
   const res = await fetch(`${serverApiUrl}${path}`, { headers: { cookie: cookieHeader }, cache: "no-store" });
   if (res.status === 401) redirect("/login");
+  if (res.status === 403) {
+    const error = await res.clone().json().catch(() => null);
+    if (error?.error === "no_tenant") redirect("/choose-business");
+  }
   if (!res.ok) throw new Error(`API ${path} failed with ${res.status}`);
   return res.json() as Promise<T>;
 }
