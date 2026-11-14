@@ -111,7 +111,7 @@ export async function authRoutes(app: FastifyInstance, { db, mailer }: { db: Db;
     const [dbUser] = await db
       .select()
       .from(tables.users)
-      .where(sql\`lower(\${tables.users.email}) = lower(\${user.email})\`)
+      .where(sql`lower(${tables.users.email}) = lower(${user.email})`)
       .limit(1);
 
     // If no DB user exists yet for these credentials we still create a session-only context.
