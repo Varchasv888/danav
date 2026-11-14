@@ -94,8 +94,9 @@ export async function authRoutes(app: FastifyInstance, { db, mailer }: { db: Db;
 
   /**
    * Local two-user login (master / staff).
-   * Staff can only sign in while at least one master session is active on this server.
-   * No database user record is needed; credentials are compiled into the binary.
+   * Staff can only sign in while at least one master session is active in the database.
+   * Credentials are checked in lib/local-auth.ts; a matching users row is created on first login
+   * because sessions.user_id has a foreign key to users.id.
    */
   app.post("/auth/local-login", { config: { rateLimit: { max: 10, timeWindow: "5 minutes" } } }, async (req, reply) => {
     const { email, password } = z.object({ email: z.string(), password: z.string() }).parse(req.body);
@@ -107,26 +108,36 @@ export async function authRoutes(app: FastifyInstance, { db, mailer }: { db: Db;
       throw new HttpError(401, "staff_requires_master_online");
     }
 
-    // Reuse (or find) the first tenant available, same as the normal login flow.
-    const [dbUser] = await db
-      .select()
-      .from(tables.users)
-      .where(sql`lower(${tables.users.email}) = lower(${user.email})`)
-      .limit(1);
+    // sessions.user_id is a uuid with a foreign key to users.id, so a session needs a real users row.
+    // Find the row for this local account, or create it on first use.
+    const findLocalUser = async () => {
+      const [row] = await db
+        .select()
+        .from(tables.users)
+        .where(sql`lower(${tables.users.email}) = lower(${user.email})`)
+        .limit(1);
+      return row;
+    };
 
-    // If no DB user exists yet for these credentials we still create a session-only context.
-    // The simplest path: use the first tenant in the DB (seed), or null.
-    let userId: string;
-    let tenantId: string | null = null;
-    if (dbUser) {
-      userId = dbUser.id;
-      const memberships = await tenantsForUser(db, dbUser.id);
-      tenantId = memberships[0]?.tenantId ?? null;
-    } else {
-      // No DB user: create a lightweight ephemeral session keyed by local ID.
-      // The app will work without a DB user for the local-login flow.
-      userId = user.id;
+    let dbUser = await findLocalUser();
+    if (!dbUser) {
+      // The password hash is random and unusable: local accounts never authenticate through /auth/login.
+      await db
+        .insert(tables.users)
+        .values({
+          email: user.email,
+          name: user.name,
+          passwordHash: `!${randomBytes(32).toString("hex")}`,
+        })
+        .onConflictDoNothing();
+      // Re-select instead of trusting RETURNING, so a concurrent first login still resolves to one row.
+      dbUser = await findLocalUser();
     }
+    if (!dbUser) throw new HttpError(500, "local_user_unavailable");
+
+    const userId = dbUser.id;
+    const memberships = await tenantsForUser(db, userId);
+    const tenantId: string | null = memberships[0]?.tenantId ?? null;
 
     const s = await createSession(db, userId, tenantId, { userAgent: req.headers["user-agent"], ip: req.ip });
 
@@ -138,7 +149,7 @@ export async function authRoutes(app: FastifyInstance, { db, mailer }: { db: Db;
     return {
       tenantId,
       localRole: user.role,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { id: userId, name: user.name, email: user.email },
     };
   });
 
