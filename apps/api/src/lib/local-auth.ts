@@ -63,14 +63,23 @@ export async function isMasterOnline(db: Db): Promise<boolean> {
 }
 
 /**
- * Idempotent: adds the `local_role` column to the sessions table if it isn't there yet.
+ * Adds the `local_role` column to the sessions table if it isn't there yet.
  * Safe to call on every server start.
+ *
+ * The API connects as the restricted app role, which does not own the sessions table,
+ * so Postgres rejects ALTER TABLE for it even when the column already exists. The column
+ * is therefore created once by the database owner (see setup notes), and a failure here
+ * is logged and ignored instead of crashing the server on startup.
  */
 export async function ensureLocalAuthSchema(db: Db): Promise<void> {
-  await db.execute(sql`
-    ALTER TABLE sessions
-    ADD COLUMN IF NOT EXISTS local_role varchar(10) DEFAULT NULL
-  `);
+  try {
+    await db.execute(sql`
+      ALTER TABLE sessions
+      ADD COLUMN IF NOT EXISTS local_role varchar(10) DEFAULT NULL
+    `);
+  } catch (e) {
+    console.warn("local_role column check skipped:", (e as Error).message);
+  }
 }
 
 /**
