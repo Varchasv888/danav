@@ -27,10 +27,28 @@ export interface LocalUser {
   role: LocalRole;
 }
 
-/** Hardcoded credentials. Change these strings to rotate passwords. */
+/**
+ * Credentials for the two local accounts.
+ * Override via env vars in production:
+ *   LOCAL_MASTER_EMAIL / LOCAL_MASTER_PASSWORD
+ *   LOCAL_STAFF_EMAIL  / LOCAL_STAFF_PASSWORD
+ * Dev defaults are insecure — always set these in Vercel for a real deployment.
+ */
 const USERS: Array<LocalUser & { password: string }> = [
-  { id: "local-master", name: "Master", email: "master@store.local", password: "Master@2024", role: "master" },
-  { id: "local-staff",  name: "Staff",  email: "staff@store.local",  password: "Staff@2024",  role: "staff"  },
+  {
+    id: "local-master",
+    name: "Master",
+    email: process.env.LOCAL_MASTER_EMAIL ?? "master@store.local",
+    password: process.env.LOCAL_MASTER_PASSWORD ?? "Master@2024",
+    role: "master",
+  },
+  {
+    id: "local-staff",
+    name: "Staff",
+    email: process.env.LOCAL_STAFF_EMAIL ?? "staff@store.local",
+    password: process.env.LOCAL_STAFF_PASSWORD ?? "Staff@2024",
+    role: "staff",
+  },
 ];
 
 /** Returns the matching LocalUser, or an error code. Does NOT check the master-online gate yet. */

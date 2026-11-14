@@ -20,6 +20,11 @@ const Env = z.object({
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
   // Lets a scheduler (Vercel Cron) call GET /cron/reports with "Authorization: Bearer <CRON_SECRET>".
   CRON_SECRET: z.string().min(16).optional(),
+  // Local-login account overrides. Set these in Vercel to avoid shipping default credentials.
+  LOCAL_MASTER_EMAIL: z.string().email().optional(),
+  LOCAL_MASTER_PASSWORD: z.string().min(8).optional(),
+  LOCAL_STAFF_EMAIL: z.string().email().optional(),
+  LOCAL_STAFF_PASSWORD: z.string().min(8).optional(),
 });
 
 // Hosts that inject their own DATABASE_URL (as the database owner, e.g. the Vercel–Neon integration)

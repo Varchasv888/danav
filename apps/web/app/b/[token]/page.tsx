@@ -4,7 +4,7 @@ import { ReceiptView, type Receipt } from "@/components/pos/ReceiptView";
 import { TaxDocument, type PrintData } from "@/components/print/TaxDocument";
 import { PrintButton } from "@/components/sales/PrintButton";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4100";
+import { serverApiUrl as API_URL } from "@/lib/server-api-url";
 
 interface Statement {
   asOf: string; company: { name: string; gstin: string | null; address: { line1?: string; line2?: string; city?: string; pincode?: string } | null };

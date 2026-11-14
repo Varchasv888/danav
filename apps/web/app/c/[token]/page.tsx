@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { CatalogueSheet, type SheetTile } from "@/components/inventory/CatalogueSheet";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4100";
+import { serverApiUrl as API_URL } from "@/lib/server-api-url";
 type Shared = { company: string; name: string; party: string | null; until: string | null; tiles: SheetTile[] };
 
 async function load(token: string): Promise<Shared | null> {

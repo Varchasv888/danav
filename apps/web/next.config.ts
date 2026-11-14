@@ -1,14 +1,19 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4100";
 const I18N_REQUEST = "./i18n/request.ts";
 
 const config: NextConfig = {
   transpilePackages: ["@varchasv/domain", "@varchasv/i18n"],
   // The browser talks to the API through /api on the same origin, so the session cookie is first-party.
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${API_URL}/:path*` }];
+    return [{ source: "/api/:path*", destination: (() => {
+      const url = process.env.API_URL;
+      if (!url && process.env.NODE_ENV === "production") {
+        throw new Error("API_URL env var is not set. Add it to Vercel: Settings > Environment Variables.");
+      }
+      return `${url ?? "http://localhost:4100"}/:path*`;
+    })() }];
   },
   poweredByHeader: false,
   async headers() {

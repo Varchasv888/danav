@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { AcceptInvite } from "@/components/team/AcceptInvite";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4100";
+import { serverApiUrl as API_URL } from "@/lib/server-api-url";
 
 export default async function InvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
