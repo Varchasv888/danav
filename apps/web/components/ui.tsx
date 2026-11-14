@@ -44,7 +44,9 @@ export const fieldClass =
   "focus:border-ring focus:shadow-focus focus:outline-none disabled:bg-surface-2 disabled:text-muted disabled:hover:border-border-input " +
   "aria-invalid:border-danger aria-invalid:shadow-focus-danger in-[table]:h-9 in-[table]:px-2 in-[table]:text-sm in-[table]:leading-5 in-data-[density=compact]:h-9 in-data-[density=compact]:text-sm";
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> }) {
+export function Input({ className, placeholder, ...props }: InputHTMLAttributes<HTMLInputElement> & { ref?: Ref<HTMLInputElement> }) {
+  // Keep an accessible name for standalone search/filter boxes while hiding example text.
+  if (!props.id && !props["aria-label"] && !props["aria-labelledby"] && placeholder) props["aria-label"] = placeholder;
   return <input className={cn(fieldClass, className)} {...props} />;
 }
 
@@ -57,10 +59,10 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
 }
 
 /**
- * A form field: the label sits above its box in the normal text colour (14px medium), the hint below in 13px muted. An error replaces the hint, with an icon, and
+ * A form field: the label sits above its box; optional helper copy is hidden. An error appears below with an icon, and
  * the box shakes once as it appears. `required` writes the word beside the label instead of a red star.
  */
-export function Field({ label, hint, error, children, htmlFor, required, requiredText }: { label: ReactNode; hint?: ReactNode; error?: ReactNode; children: ReactNode; htmlFor?: string; required?: boolean; requiredText?: string }) {
+export function Field({ label, error, children, htmlFor, required, requiredText }: { label: ReactNode; hint?: ReactNode; error?: ReactNode; children: ReactNode; htmlFor?: string; required?: boolean; requiredText?: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <label htmlFor={htmlFor} className="flex items-baseline justify-between gap-2 text-sm leading-5 font-medium text-text-secondary">
@@ -69,7 +71,7 @@ export function Field({ label, hint, error, children, htmlFor, required, require
       </label>
       <div className={error ? "animate-shake motion-reduce:animate-none" : undefined}>{children}</div>
       {error ? <p role="alert" className="flex items-start gap-1 text-[13px] leading-[18px] text-danger animate-pop-in motion-reduce:animate-none"><AlertCircle className="mt-px size-3.5 shrink-0" aria-hidden />{error}</p>
-        : hint ? <p className="text-[13px] leading-[18px] text-muted">{hint}</p> : null}
+        : null}
     </div>
   );
 }
