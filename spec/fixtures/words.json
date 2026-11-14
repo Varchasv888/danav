@@ -1,0 +1,27 @@
+{
+  "description": "Amount in words (Indian system) and Indian digit grouping.",
+  "words": [
+    { "amount": "0", "lang": "en", "expect": "Rupees Zero Only" },
+    { "amount": "1180", "lang": "en", "expect": "Rupees One Thousand One Hundred Eighty Only" },
+    { "amount": "123456.78", "lang": "en", "expect": "Rupees One Lakh Twenty-Three Thousand Four Hundred Fifty-Six and Seventy-Eight Paise Only" },
+    { "amount": "1000000000", "lang": "en", "expect": "Rupees One Hundred Crore Only" },
+    { "amount": "12345678901.05", "lang": "en", "expect": "Rupees One Thousand Two Hundred Thirty-Four Crore Fifty-Six Lakh Seventy-Eight Thousand Nine Hundred One and Five Paise Only" },
+    { "amount": "1180", "lang": "hi", "expect": "एक हज़ार एक सौ अस्सी रुपये मात्र" },
+    { "amount": "123456.78", "lang": "hi", "expect": "एक लाख तेईस हज़ार चार सौ छप्पन रुपये और अठहत्तर पैसे मात्र" },
+    { "amount": "250.50", "lang": "hi", "expect": "दो सौ पचास रुपये और पचास पैसे मात्र" },
+    { "amount": "99", "lang": "hi", "expect": "निन्यानबे रुपये मात्र" },
+    { "amount": "100", "lang": "mr", "expect": "शंभर रुपये फक्त" },
+    { "amount": "1180", "lang": "mr", "expect": "एक हजार एकशे ऐंशी रुपये फक्त" },
+    { "amount": "123456.78", "lang": "mr", "expect": "एक लाख तेवीस हजार चारशे छप्पन्न रुपये आणि अठ्ठ्याहत्तर पैसे फक्त" },
+    { "amount": "12345678", "lang": "mr", "expect": "एक कोटी तेवीस लाख पंचेचाळीस हजार सहाशे अठ्ठ्याहत्तर रुपये फक्त" },
+    { "amount": "2100.05", "lang": "mr", "expect": "दोन हजार शंभर रुपये आणि पाच पैसे फक्त" },
+    { "amount": "99", "lang": "mr", "expect": "नव्व्याण्णव रुपये फक्त" }
+  ],
+  "grouping": [
+    { "amount": "1234567.8", "expect": "12,34,567.80" },
+    { "amount": "999", "expect": "999.00" },
+    { "amount": "100000", "expect": "1,00,000.00" },
+    { "amount": "-12345.5", "expect": "-12,345.50" },
+    { "amount": "1234567890", "expect": "1,23,45,67,890.00" }
+  ]
+}

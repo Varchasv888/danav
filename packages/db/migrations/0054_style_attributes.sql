@@ -1,0 +1,1 @@
+ALTER TABLE "styles" ADD COLUMN "attributes" jsonb DEFAULT '{}'::jsonb NOT NULL;

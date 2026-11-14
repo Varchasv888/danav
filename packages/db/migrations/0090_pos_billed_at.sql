@@ -1,0 +1,1 @@
+ALTER TABLE "pos_bills" ADD COLUMN "billed_at" timestamp with time zone;

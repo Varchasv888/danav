@@ -1,0 +1,37 @@
+{
+  "name": "varchasverp",
+  "private": true,
+  "description": "Varchasv ERP Systems — offline + online ERP for Indian businesses",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "db:migrate": "npm run migrate -w @varchasv/db",
+    "demo:seed": "npm run seed:demo -w @varchasv/api --",
+    "db:backup": "node scripts/db.mjs backup",
+    "db:restore": "node scripts/db.mjs restore",
+    "db:drill": "node scripts/db.mjs drill",
+    "i18n:check": "npm run check -w @varchasv/i18n",
+    "i18n:arb": "npm run arb -w @varchasv/i18n"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.5",
+    "typescript": "~5.9.3",
+    "vitest": "^5.0.2"
+  },
+  "engines": { "node": ">=24" },
+  "packageManager": "npm@11.13.0",
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.18.20": true,
+    "@parcel/watcher@2.6.0": true,
+    "@swc/core@1.16.12": true
+  }
+}

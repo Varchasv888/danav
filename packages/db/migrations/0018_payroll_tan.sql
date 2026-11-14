@@ -1,0 +1,1 @@
+ALTER TABLE "payroll_settings" ADD COLUMN "tan" char(10);

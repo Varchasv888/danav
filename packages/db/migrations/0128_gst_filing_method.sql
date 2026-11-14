@@ -1,0 +1,1 @@
+ALTER TABLE "gst_settings" ADD COLUMN "filing_method" varchar(12) DEFAULT 'manual' NOT NULL;

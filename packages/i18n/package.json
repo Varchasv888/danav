@@ -1,0 +1,16 @@
+{
+  "name": "@varchasv/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "UI string catalogues (ICU). Source of truth for the Next.js app; generates Flutter ARB files.",
+  "exports": {
+    "./messages/*.json": "./messages/*.json",
+    "./locales": { "types": "./locales.d.ts", "default": "./locales.js" }
+  },
+  "scripts": {
+    "check": "tsx scripts/check.ts",
+    "arb": "tsx scripts/arb.ts",
+    "test": "tsx scripts/check.ts"
+  }
+}

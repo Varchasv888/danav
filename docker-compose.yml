@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    # A separate container and port from the standalone dev Postgres (varchasv-postgres on 5433), so the demo
+    # gets its own clean database instead of colliding with, or sharing, whatever is in the dev one.
+    container_name: varchasv-postgres-demo
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: varchasv_owner
+      POSTGRES_PASSWORD: varchasv_owner_dev
+      POSTGRES_DB: varchasv
+    ports:
+      - "5434:5432"
+    volumes:
+      - varchasv-pg:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U varchasv_owner -d varchasv"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  # The whole system for testers: docker compose --profile app up --build
+  # Needs SECRETS_KEY in .env (see .env.example). Then http://localhost:3100
+  migrate:
+    profiles: [app]
+    build: .
+    image: varchasv-erp
+    command: ["npm", "run", "db:migrate"]
+    environment:
+      DATABASE_OWNER_URL: postgres://varchasv_owner:varchasv_owner_dev@postgres:5432/varchasv
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    profiles: [app]
+    image: varchasv-erp
+    restart: unless-stopped
+    environment: &api-env
+      DATABASE_URL: postgres://varchasv_app:varchasv_app_dev@postgres:5432/varchasv
+      DATABASE_OWNER_URL: postgres://varchasv_owner:varchasv_owner_dev@postgres:5432/varchasv
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3100}
+      SECRETS_KEY: ${SECRETS_KEY:-}  # required: the API refuses to start in production without it
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      SMTP_URL: ${SMTP_URL:-}
+      MAIL_FROM: ${MAIL_FROM:-Varchasv ERP <no-reply@varchasv.in>}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID:-}
+    ports:
+      - "4100:4100"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4100/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    profiles: [app]
+    image: varchasv-erp
+    restart: unless-stopped
+    command: ["npm", "run", "start", "-w", "@varchasv/web"]
+    environment:
+      API_URL: http://api:4100
+    ports:
+      - "3100:3100"
+    depends_on:
+      api: { condition: service_healthy }
+
+  # A ready-made demo business: docker compose --profile app run --rm seed
+  seed:
+    profiles: [app]
+    image: varchasv-erp
+    command: ["npm", "run", "demo:seed"]
+    environment:
+      <<: *api-env
+      NODE_ENV: development # a one-off job that goes through the API in-process; it needs no SECRETS_KEY
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+volumes:
+  varchasv-pg:

@@ -1,0 +1,16 @@
+{
+  "name": "@varchasv/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference implementation of Varchasv business rules (money, GST, fiscal year, numbering, posting). Pure, no I/O. The Flutter app ports this and must pass spec/fixtures.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": { "decimal.js": "^10.6.0" }
+}

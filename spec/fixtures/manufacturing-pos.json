@@ -1,0 +1,533 @@
+{
+  "description": "BOM explosion and cost roll-up, MRP, and POS bills (GST-inclusive and exclusive), payments and loyalty. Worked by hand.",
+  "boms": {
+    "cake": {
+      "itemId": "cake",
+      "outputQty": "10",
+      "overhead": "200",
+      "lines": [
+        {
+          "itemId": "flour",
+          "qty": "2",
+          "wastagePct": "5"
+        },
+        {
+          "itemId": "sugar",
+          "qty": "1.5"
+        },
+        {
+          "itemId": "cream",
+          "qty": "1"
+        }
+      ]
+    },
+    "cream": {
+      "itemId": "cream",
+      "outputQty": "2",
+      "lines": [
+        {
+          "itemId": "milk",
+          "qty": "3",
+          "wastagePct": "10"
+        },
+        {
+          "itemId": "sugar",
+          "qty": "0.5"
+        }
+      ]
+    }
+  },
+  "explode": [
+    {
+      "name": "25 cakes, one level",
+      "itemId": "cake",
+      "qty": "25",
+      "multiLevel": false,
+      "expect": [
+        {
+          "itemId": "flour",
+          "qty": "5.2500"
+        },
+        {
+          "itemId": "sugar",
+          "qty": "3.7500"
+        },
+        {
+          "itemId": "cream",
+          "qty": "2.5000"
+        }
+      ]
+    },
+    {
+      "name": "25 cakes, down to bought materials",
+      "itemId": "cake",
+      "qty": "25",
+      "multiLevel": true,
+      "expect": [
+        {
+          "itemId": "flour",
+          "qty": "5.2500"
+        },
+        {
+          "itemId": "sugar",
+          "qty": "4.3750"
+        },
+        {
+          "itemId": "milk",
+          "qty": "4.1250"
+        }
+      ]
+    }
+  ],
+  "rollup": {
+    "itemId": "cake",
+    "rates": {
+      "flour": "40",
+      "sugar": "45",
+      "milk": "60"
+    },
+    "expect": {
+      "unitCost": "46.1750",
+      "overheadPerUnit": "20.00",
+      "lines": [
+        {
+          "itemId": "flour",
+          "qtyPerUnit": "0.2100",
+          "rate": "40.0000",
+          "cost": "8.40"
+        },
+        {
+          "itemId": "sugar",
+          "qtyPerUnit": "0.1500",
+          "rate": "45.0000",
+          "cost": "6.75"
+        },
+        {
+          "itemId": "cream",
+          "qtyPerUnit": "0.1000",
+          "rate": "110.2500",
+          "cost": "11.03"
+        }
+      ]
+    }
+  },
+  "cycle": {
+    "boms": {
+      "a": {
+        "itemId": "a",
+        "outputQty": "1",
+        "lines": [
+          {
+            "itemId": "b",
+            "qty": "1"
+          }
+        ]
+      },
+      "b": {
+        "itemId": "b",
+        "outputQty": "1",
+        "lines": [
+          {
+            "itemId": "a",
+            "qty": "1"
+          }
+        ]
+      }
+    },
+    "expect": "bom_cycle"
+  },
+  "mrp": {
+    "today": "2026-10-01",
+    "items": {
+      "cake": {
+        "itemId": "cake",
+        "onHand": "5",
+        "onOrder": "0",
+        "leadTimeDays": 1,
+        "wholeUnits": true
+      },
+      "cream": {
+        "itemId": "cream",
+        "onHand": "0.5",
+        "onOrder": "0",
+        "leadTimeDays": 0
+      },
+      "flour": {
+        "itemId": "flour",
+        "onHand": "2",
+        "onOrder": "1",
+        "minOrderQty": "10",
+        "leadTimeDays": 3
+      },
+      "sugar": {
+        "itemId": "sugar",
+        "onHand": "10",
+        "onOrder": "0",
+        "leadTimeDays": 2
+      },
+      "milk": {
+        "itemId": "milk",
+        "onHand": "1",
+        "onOrder": "0",
+        "safetyStock": "2",
+        "leadTimeDays": 1
+      }
+    },
+    "demands": [
+      {
+        "itemId": "cake",
+        "qty": "22",
+        "dueDate": "2026-10-10"
+      },
+      {
+        "itemId": "cake",
+        "qty": "3",
+        "dueDate": "2026-10-08"
+      }
+    ],
+    "expect": [
+      {
+        "itemId": "cake",
+        "action": "make",
+        "qty": "20.0000",
+        "needBy": "2026-10-08",
+        "releaseBy": "2026-10-07",
+        "shortage": "20.0000"
+      },
+      {
+        "itemId": "flour",
+        "action": "buy",
+        "qty": "10.0000",
+        "needBy": "2026-10-07",
+        "releaseBy": "2026-10-04",
+        "shortage": "1.2000"
+      },
+      {
+        "itemId": "cream",
+        "action": "make",
+        "qty": "1.5000",
+        "needBy": "2026-10-07",
+        "releaseBy": "2026-10-07",
+        "shortage": "1.5000"
+      },
+      {
+        "itemId": "milk",
+        "action": "buy",
+        "qty": "3.4750",
+        "needBy": "2026-10-07",
+        "releaseBy": "2026-10-06",
+        "shortage": "3.4750"
+      }
+    ]
+  },
+  "posBills": [
+    {
+      "name": "menu price includes 5% GST",
+      "lines": [
+        {
+          "qty": "2",
+          "price": "110",
+          "gstRate": "5"
+        }
+      ],
+      "options": {
+        "inclusive": true
+      },
+      "expect": {
+        "taxable": "209.52",
+        "cgst": "5.24",
+        "sgst": "5.24",
+        "cess": "0.00",
+        "roundOff": "0.00",
+        "total": "220.00",
+        "discount": "0.00",
+        "lines": [
+          {
+            "discount": "0.00",
+            "taxable": "209.52",
+            "cgst": "5.24",
+            "total": "220.00"
+          }
+        ],
+        "taxByRate": [
+          {
+            "rate": "5",
+            "taxable": "209.52",
+            "cgst": "5.24",
+            "sgst": "5.24",
+            "cess": "0.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "bill discount spread by value over 5% and 18% items",
+      "lines": [
+        {
+          "qty": "1",
+          "price": "150",
+          "gstRate": "5"
+        },
+        {
+          "qty": "2",
+          "price": "25",
+          "gstRate": "18"
+        }
+      ],
+      "options": {
+        "inclusive": true,
+        "billDiscount": "20"
+      },
+      "expect": {
+        "taxable": "166.72",
+        "cgst": "6.64",
+        "sgst": "6.64",
+        "cess": "0.00",
+        "roundOff": "0.00",
+        "total": "180.00",
+        "discount": "20.00",
+        "lines": [
+          {
+            "discount": "15.00",
+            "taxable": "128.58",
+            "cgst": "3.21",
+            "total": "135.00"
+          },
+          {
+            "discount": "5.00",
+            "taxable": "38.14",
+            "cgst": "3.43",
+            "total": "45.00"
+          }
+        ],
+        "taxByRate": [
+          {
+            "rate": "5",
+            "taxable": "128.58",
+            "cgst": "3.21",
+            "sgst": "3.21",
+            "cess": "0.00"
+          },
+          {
+            "rate": "18",
+            "taxable": "38.14",
+            "cgst": "3.43",
+            "sgst": "3.43",
+            "cess": "0.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "tax on top, rounded to the rupee",
+      "lines": [
+        {
+          "qty": "3",
+          "price": "99.50",
+          "gstRate": "5"
+        }
+      ],
+      "options": {
+        "inclusive": false
+      },
+      "expect": {
+        "taxable": "298.50",
+        "cgst": "7.46",
+        "sgst": "7.46",
+        "cess": "0.00",
+        "roundOff": "-0.42",
+        "total": "313.00",
+        "discount": "0.00",
+        "lines": [
+          {
+            "discount": "0.00",
+            "taxable": "298.50",
+            "cgst": "7.46",
+            "total": "313.42"
+          }
+        ],
+        "taxByRate": [
+          {
+            "rate": "5",
+            "taxable": "298.50",
+            "cgst": "7.46",
+            "sgst": "7.46",
+            "cess": "0.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "28% plus 12% cess inside the price",
+      "lines": [
+        {
+          "qty": "1",
+          "price": "100",
+          "gstRate": "28",
+          "cessRate": "12"
+        }
+      ],
+      "options": {
+        "inclusive": true
+      },
+      "expect": {
+        "taxable": "71.43",
+        "cgst": "10.00",
+        "sgst": "10.00",
+        "cess": "8.57",
+        "roundOff": "0.00",
+        "total": "100.00",
+        "discount": "0.00",
+        "lines": [
+          {
+            "discount": "0.00",
+            "taxable": "71.43",
+            "cgst": "10.00",
+            "total": "100.00"
+          }
+        ],
+        "taxByRate": [
+          {
+            "rate": "28",
+            "taxable": "71.43",
+            "cgst": "10.00",
+            "sgst": "10.00",
+            "cess": "8.57"
+          }
+        ]
+      }
+    }
+  ],
+  "payments": [
+    {
+      "name": "UPI part, cash with change",
+      "total": "345",
+      "payments": [
+        {
+          "mode": "upi",
+          "amount": "200"
+        },
+        {
+          "mode": "cash",
+          "amount": "200"
+        }
+      ],
+      "expect": {
+        "change": "55.00",
+        "cash": "145.00",
+        "upi": "200.00",
+        "card": "0.00",
+        "credit": "0.00"
+      }
+    },
+    {
+      "name": "card can't be more than the bill",
+      "total": "100",
+      "payments": [
+        {
+          "mode": "card",
+          "amount": "150"
+        }
+      ],
+      "error": "overpaid_non_cash"
+    },
+    {
+      "name": "short payment",
+      "total": "100",
+      "payments": [
+        {
+          "mode": "cash",
+          "amount": "50"
+        }
+      ],
+      "error": "underpaid"
+    }
+  ],
+  "loyalty": {
+    "rule": {
+      "pointsPer100": 2,
+      "pointValue": "0.5",
+      "maxRedeemPct": "20"
+    },
+    "earned": [
+      {
+        "paid": "345",
+        "expect": 6
+      },
+      {
+        "paid": "99",
+        "expect": 0
+      }
+    ],
+    "redeem": [
+      {
+        "balance": 100,
+        "bill": "345",
+        "expect": {
+          "points": 100,
+          "value": "50.00"
+        }
+      },
+      {
+        "balance": 500,
+        "bill": "345",
+        "expect": {
+          "points": 138,
+          "value": "69.00"
+        }
+      }
+    ],
+    "slabRule": {
+      "pointsPer100": 1,
+      "pointValue": "0.5",
+      "maxRedeemPct": "20",
+      "slabs": [
+        {
+          "from": "5000",
+          "per100": 2
+        },
+        {
+          "from": "20000",
+          "per100": 3
+        }
+      ],
+      "minRedeem": 50
+    },
+    "slabEarned": [
+      {
+        "paid": "4999",
+        "expect": 49
+      },
+      {
+        "paid": "5000",
+        "expect": 100
+      },
+      {
+        "paid": "19999",
+        "expect": 398
+      },
+      {
+        "paid": "20000",
+        "expect": 600
+      }
+    ],
+    "slabRedeem": [
+      {
+        "balance": 49,
+        "bill": "1000",
+        "expect": {
+          "points": 0,
+          "value": "0.00"
+        }
+      },
+      {
+        "balance": 50,
+        "bill": "1000",
+        "expect": {
+          "points": 50,
+          "value": "25.00"
+        }
+      }
+    ]
+  }
+}

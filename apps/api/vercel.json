@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@varchasv/api",
+  "outputDirectory": "apps/api/public",
+  "regions": ["sin1"],
+  "functions": {
+    "api/index.mjs": { "maxDuration": 60 }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index.mjs" }],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "company_preferences" ADD COLUMN "passcode_hash" varchar(200);

@@ -1,0 +1,26 @@
+{
+  "description": "Voucher-type rules on top of journal balancing. cashOrBank marks accounts under Cash-in-Hand, Bank Accounts or Bank OD.",
+  "cases": [
+    { "name": "payment of rent from bank", "type": "payment", "lines": [
+        { "accountId": "rent", "debit": "15000", "cashOrBank": false },
+        { "accountId": "hdfc", "credit": "15000", "cashOrBank": true }], "expectErrors": [] },
+    { "name": "payment without cash or bank", "type": "payment", "lines": [
+        { "accountId": "rent", "debit": "15000", "cashOrBank": false },
+        { "accountId": "capital", "credit": "15000", "cashOrBank": false }], "expectErrors": ["payment_needs_cash_bank_credit"] },
+    { "name": "receipt from a customer into cash", "type": "receipt", "lines": [
+        { "accountId": "cash", "debit": "5900", "cashOrBank": true },
+        { "accountId": "ramesh", "credit": "5900", "cashOrBank": false }], "expectErrors": [] },
+    { "name": "receipt crediting cash is wrong way round", "type": "receipt", "lines": [
+        { "accountId": "ramesh", "debit": "5900", "cashOrBank": false },
+        { "accountId": "cash", "credit": "5900", "cashOrBank": true }], "expectErrors": ["receipt_needs_cash_bank_debit"] },
+    { "name": "contra: cash deposited into bank", "type": "contra", "lines": [
+        { "accountId": "hdfc", "debit": "20000", "cashOrBank": true },
+        { "accountId": "cash", "credit": "20000", "cashOrBank": true }], "expectErrors": [] },
+    { "name": "contra touching a non-cash account", "type": "contra", "lines": [
+        { "accountId": "hdfc", "debit": "20000", "cashOrBank": true },
+        { "accountId": "sales", "credit": "20000", "cashOrBank": false }], "expectErrors": ["contra_only_cash_bank"] },
+    { "name": "unbalanced journal also fails its type rule check independently", "type": "journal", "lines": [
+        { "accountId": "salaries", "debit": "100", "cashOrBank": false },
+        { "accountId": "provision", "credit": "90", "cashOrBank": false }], "expectErrors": ["unbalanced"] }
+  ]
+}

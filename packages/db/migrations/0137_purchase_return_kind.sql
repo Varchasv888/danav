@@ -1,0 +1,1 @@
+ALTER TABLE "purchase_returns" ADD COLUMN "kind" varchar(8) DEFAULT 'goods' NOT NULL;

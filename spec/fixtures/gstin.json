@@ -1,0 +1,13 @@
+{
+  "description": "GSTIN validation. 27AAPFU0939F1ZV is the sample GSTIN published in GSTN documentation; it anchors the mod-36 checksum.",
+  "cases": [
+    { "gstin": "27AAPFU0939F1ZV", "expect": "valid" },
+    { "gstin": "29AAGCB7383J1Z4", "expect": "valid" },
+    { "gstin": "04AABCT1332L1ZM", "expect": "valid" },
+    { "gstin": " 27aapfu0939f1zv ", "expect": "valid" },
+    { "gstin": "27AAPFU0939F1ZW", "expect": "checksum" },
+    { "gstin": "99AAPFU0939F1ZV", "expect": "state" },
+    { "gstin": "27AAPFU0939F1Z", "expect": "length" },
+    { "gstin": "2AAAPFU0939F1ZV", "expect": "format" }
+  ]
+}

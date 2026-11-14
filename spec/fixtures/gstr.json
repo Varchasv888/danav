@@ -1,0 +1,180 @@
+{
+  "description": "GSTR-1 section for an outward invoice, and tax period bounds.",
+  "sections": [
+    {
+      "name": "registered customer, same state",
+      "inv": {
+        "customerGstin": "27AAPFU0939F1ZV",
+        "supplyKind": "intra",
+        "invoiceValue": "500"
+      },
+      "expect": "B2B"
+    },
+    {
+      "name": "registered customer, other state",
+      "inv": {
+        "customerGstin": "29AAGCB7383J1Z4",
+        "supplyKind": "inter",
+        "invoiceValue": "500000"
+      },
+      "expect": "B2B"
+    },
+    {
+      "name": "SEZ unit is B2B",
+      "inv": {
+        "customerGstin": "27AAPFU0939F1ZV",
+        "supplyKind": "sez",
+        "invoiceValue": "10"
+      },
+      "expect": "B2B"
+    },
+    {
+      "name": "unregistered, other state, above ₹1 lakh",
+      "inv": {
+        "customerGstin": null,
+        "supplyKind": "inter",
+        "invoiceValue": "100000.01"
+      },
+      "expect": "B2CL"
+    },
+    {
+      "name": "unregistered, other state, exactly ₹1 lakh stays B2CS",
+      "inv": {
+        "customerGstin": null,
+        "supplyKind": "inter",
+        "invoiceValue": "100000"
+      },
+      "expect": "B2CS"
+    },
+    {
+      "name": "unregistered, same state, any value",
+      "inv": {
+        "customerGstin": null,
+        "supplyKind": "intra",
+        "invoiceValue": "900000"
+      },
+      "expect": "B2CS"
+    },
+    {
+      "name": "export",
+      "inv": {
+        "customerGstin": null,
+        "supplyKind": "export",
+        "invoiceValue": "1"
+      },
+      "expect": "EXP"
+    }
+  ],
+  "periods": [
+    {
+      "fp": "092026",
+      "expect": {
+        "from": "2026-09-01",
+        "to": "2026-09-30"
+      }
+    },
+    {
+      "fp": "022028",
+      "expect": {
+        "from": "2028-02-01",
+        "to": "2028-02-29"
+      }
+    },
+    {
+      "fp": "122026",
+      "expect": {
+        "from": "2026-12-01",
+        "to": "2026-12-31"
+      }
+    }
+  ],
+  "setOff": [
+    {
+      "name": "IGST credit covers IGST, then CGST, then SGST",
+      "liability": {
+        "igst": "1000",
+        "cgst": "500",
+        "sgst": "500",
+        "cess": "0"
+      },
+      "credit": {
+        "igst": "1800",
+        "cgst": "0",
+        "sgst": "0",
+        "cess": "0"
+      },
+      "expect": {
+        "cashPayable": {
+          "igst": "0.00",
+          "cgst": "0.00",
+          "sgst": "200.00",
+          "cess": "0.00"
+        },
+        "creditCarriedForward": {
+          "igst": "0.00",
+          "cgst": "0.00",
+          "sgst": "0.00",
+          "cess": "0.00"
+        }
+      }
+    },
+    {
+      "name": "CGST credit can't pay SGST; leftover CGST pays IGST",
+      "liability": {
+        "igst": "300",
+        "cgst": "100",
+        "sgst": "400",
+        "cess": "0"
+      },
+      "credit": {
+        "igst": "0",
+        "cgst": "500",
+        "sgst": "0",
+        "cess": "0"
+      },
+      "expect": {
+        "cashPayable": {
+          "igst": "0.00",
+          "cgst": "0.00",
+          "sgst": "400.00",
+          "cess": "0.00"
+        },
+        "creditCarriedForward": {
+          "igst": "0.00",
+          "cgst": "100.00",
+          "sgst": "0.00",
+          "cess": "0.00"
+        }
+      }
+    },
+    {
+      "name": "cess credit pays only cess; unused credit carries forward",
+      "liability": {
+        "igst": "0",
+        "cgst": "50",
+        "sgst": "50",
+        "cess": "100"
+      },
+      "credit": {
+        "igst": "0",
+        "cgst": "80",
+        "sgst": "20",
+        "cess": "250"
+      },
+      "expect": {
+        "cashPayable": {
+          "igst": "0.00",
+          "cgst": "0.00",
+          "sgst": "30.00",
+          "cess": "0.00"
+        },
+        "creditCarriedForward": {
+          "igst": "0.00",
+          "cgst": "30.00",
+          "sgst": "0.00",
+          "cess": "150.00"
+        }
+      }
+    }
+  ]
+}

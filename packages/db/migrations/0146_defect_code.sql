@@ -1,0 +1,1 @@
+ALTER TABLE "goods_receipt_lines" ADD COLUMN "defect_code" varchar(20);

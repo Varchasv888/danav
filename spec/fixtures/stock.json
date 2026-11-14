@@ -1,0 +1,29 @@
+{
+  "description": "Stock valuation for one item in one warehouse. Moves are replayed in order. See packages/domain/src/inventory.ts for the rules.",
+  "cases": [
+    { "name": "moving average", "method": "average",
+      "moves": [{ "qtyIn": "10", "rate": "100" }, { "qtyIn": "10", "rate": "120" }, { "qtyOut": "5" }],
+      "expect": { "qty": "15.0000", "value": "1650.00", "valueChanges": ["1000.00", "1200.00", "-550.00"] } },
+    { "name": "FIFO takes the oldest layer first", "method": "fifo",
+      "moves": [{ "qtyIn": "10", "rate": "100" }, { "qtyIn": "10", "rate": "120" }, { "qtyOut": "5" }],
+      "expect": { "qty": "15.0000", "value": "1700.00", "valueChanges": ["1000.00", "1200.00", "-500.00"] } },
+    { "name": "FIFO issue spanning two layers", "method": "fifo",
+      "moves": [{ "qtyIn": "10", "rate": "100" }, { "qtyIn": "10", "rate": "120" }, { "qtyOut": "15" }],
+      "expect": { "qty": "5.0000", "value": "600.00", "valueChanges": ["1000.00", "1200.00", "-1600.00"] } },
+    { "name": "average with a half-paisa rate rounds half up", "method": "average",
+      "moves": [{ "qtyIn": "3", "rate": "10" }, { "qtyIn": "3", "rate": "10.01" }, { "qtyOut": "1" }],
+      "expect": { "qty": "5.0000", "value": "50.02", "valueChanges": ["30.00", "30.03", "-10.01"] } },
+    { "name": "issuing everything takes the whole value, no ghost paise", "method": "average",
+      "moves": [{ "qtyIn": "3", "rate": "33.33" }, { "qtyIn": "1", "rate": "33.34" }, { "qtyOut": "1" }, { "qtyOut": "3" }],
+      "expect": { "qty": "0.0000", "value": "0.00", "valueChanges": ["99.99", "33.34", "-33.33", "-100.00"] } },
+    { "name": "negative stock is valued at the last rate; the next receipt restarts at its rate", "method": "average",
+      "moves": [{ "qtyIn": "2", "rate": "50" }, { "qtyOut": "3" }, { "qtyIn": "2", "rate": "60" }],
+      "expect": { "qty": "1.0000", "value": "60.00", "valueChanges": ["100.00", "-150.00", "110.00"] } },
+    { "name": "same negative-stock rule under FIFO", "method": "fifo",
+      "moves": [{ "qtyIn": "2", "rate": "50" }, { "qtyOut": "3" }, { "qtyIn": "2", "rate": "60" }, { "qtyOut": "1" }],
+      "expect": { "qty": "0.0000", "value": "0.00", "valueChanges": ["100.00", "-150.00", "110.00", "-60.00"] } },
+    { "name": "fractional quantities (kg) keep 4 decimals", "method": "average",
+      "moves": [{ "qtyIn": "12.5", "rate": "42.80" }, { "qtyOut": "0.375" }],
+      "expect": { "qty": "12.1250", "value": "518.95", "valueChanges": ["535.00", "-16.05"] } }
+  ]
+}

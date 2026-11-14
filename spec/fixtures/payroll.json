@@ -1,0 +1,1016 @@
+{
+  "description": "Payroll: PF, ESI, professional tax, income tax (FY 2026-27), TDS, payslips, gratuity and leave encashment. Amounts in whole rupees.",
+  "pfWages": [
+    {
+      "name": "allowances over half of gross: wages lifted to half",
+      "wageComponents": "10000",
+      "gross": "30000",
+      "labourCode": true,
+      "expect": "15000.00"
+    },
+    {
+      "name": "same pay before the labour codes",
+      "wageComponents": "10000",
+      "gross": "30000",
+      "labourCode": false,
+      "expect": "10000.00"
+    },
+    {
+      "name": "basic already over half",
+      "wageComponents": "18000",
+      "gross": "30000",
+      "labourCode": true,
+      "expect": "18000.00"
+    },
+    {
+      "name": "half of an odd gross rounds half up",
+      "wageComponents": "9000",
+      "gross": "20001",
+      "labourCode": true,
+      "expect": "10001.00"
+    }
+  ],
+  "pf": [
+    {
+      "name": "below the ceiling",
+      "wages": "12000",
+      "setup": {
+        "member": true,
+        "epsEligible": true,
+        "onActualWages": false
+      },
+      "expect": {
+        "epfWages": "12000.00",
+        "epsWages": "12000.00",
+        "edliWages": "12000.00",
+        "employee": "1440.00",
+        "eps": "1000.00",
+        "employerEpf": "440.00",
+        "edli": "60.00",
+        "admin": "60.00"
+      }
+    },
+    {
+      "name": "above the ceiling: capped at ₹15,000",
+      "wages": "30000",
+      "setup": {
+        "member": true,
+        "epsEligible": true,
+        "onActualWages": false
+      },
+      "expect": {
+        "epfWages": "15000.00",
+        "epsWages": "15000.00",
+        "edliWages": "15000.00",
+        "employee": "1800.00",
+        "eps": "1250.00",
+        "employerEpf": "550.00",
+        "edli": "75.00",
+        "admin": "75.00"
+      }
+    },
+    {
+      "name": "on actual wages: EPS and EDLI stay capped",
+      "wages": "30000",
+      "setup": {
+        "member": true,
+        "epsEligible": true,
+        "onActualWages": true
+      },
+      "expect": {
+        "epfWages": "30000.00",
+        "epsWages": "15000.00",
+        "edliWages": "15000.00",
+        "employee": "3600.00",
+        "eps": "1250.00",
+        "employerEpf": "2350.00",
+        "edli": "75.00",
+        "admin": "150.00"
+      }
+    },
+    {
+      "name": "not in the pension scheme: all employer share to EPF",
+      "wages": "20000",
+      "setup": {
+        "member": true,
+        "epsEligible": false,
+        "onActualWages": false
+      },
+      "expect": {
+        "epfWages": "15000.00",
+        "epsWages": "0.00",
+        "edliWages": "15000.00",
+        "employee": "1800.00",
+        "eps": "0.00",
+        "employerEpf": "1800.00",
+        "edli": "75.00",
+        "admin": "75.00"
+      }
+    },
+    {
+      "name": "not a PF member",
+      "wages": "20000",
+      "setup": {
+        "member": false,
+        "epsEligible": false,
+        "onActualWages": false
+      },
+      "expect": {
+        "epfWages": "0.00",
+        "epsWages": "0.00",
+        "edliWages": "0.00",
+        "employee": "0.00",
+        "eps": "0.00",
+        "employerEpf": "0.00",
+        "edli": "0.00",
+        "admin": "0.00"
+      }
+    }
+  ],
+  "esi": [
+    {
+      "name": "exact percentages",
+      "wages": "18000",
+      "paidDays": 30,
+      "covered": true,
+      "expect": {
+        "wages": "18000.00",
+        "employee": "135.00",
+        "employer": "585.00"
+      }
+    },
+    {
+      "name": "both shares round up",
+      "wages": "15555",
+      "paidDays": 30,
+      "covered": true,
+      "expect": {
+        "wages": "15555.00",
+        "employee": "117.00",
+        "employer": "506.00"
+      }
+    },
+    {
+      "name": "average daily wage ₹176 or less: no employee share",
+      "wages": "5000",
+      "paidDays": 30,
+      "covered": true,
+      "expect": {
+        "wages": "5000.00",
+        "employee": "0.00",
+        "employer": "163.00"
+      }
+    },
+    {
+      "name": "not covered",
+      "wages": "25000",
+      "paidDays": 30,
+      "covered": false,
+      "expect": {
+        "wages": "0.00",
+        "employee": "0.00",
+        "employer": "0.00"
+      }
+    }
+  ],
+  "esiPeriods": [
+    {
+      "date": "2026-09-15",
+      "expect": "2026-04-01"
+    },
+    {
+      "date": "2026-10-01",
+      "expect": "2026-10-01"
+    },
+    {
+      "date": "2027-02-10",
+      "expect": "2026-10-01"
+    }
+  ],
+  "esiCoverage": [
+    {
+      "gross": "21000",
+      "disabled": false,
+      "expect": true
+    },
+    {
+      "gross": "21001",
+      "disabled": false,
+      "expect": false
+    },
+    {
+      "gross": "24000",
+      "disabled": true,
+      "expect": true
+    }
+  ],
+  "pt": [
+    {
+      "state": "27",
+      "gender": "male",
+      "gross": "7500",
+      "month": 9,
+      "expect": "0.00"
+    },
+    {
+      "state": "27",
+      "gender": "male",
+      "gross": "9000",
+      "month": 9,
+      "expect": "175.00"
+    },
+    {
+      "state": "27",
+      "gender": "male",
+      "gross": "12000",
+      "month": 9,
+      "expect": "200.00"
+    },
+    {
+      "state": "27",
+      "gender": "male",
+      "gross": "12000",
+      "month": 2,
+      "expect": "300.00"
+    },
+    {
+      "state": "27",
+      "gender": "female",
+      "gross": "20000",
+      "month": 9,
+      "expect": "0.00"
+    },
+    {
+      "state": "27",
+      "gender": "female",
+      "gross": "30000",
+      "month": 2,
+      "expect": "300.00"
+    },
+    {
+      "state": "29",
+      "gender": "male",
+      "gross": "24999",
+      "month": 9,
+      "expect": "0.00"
+    },
+    {
+      "state": "29",
+      "gender": "male",
+      "gross": "25000",
+      "month": 9,
+      "expect": "200.00"
+    },
+    {
+      "state": "29",
+      "gender": "female",
+      "gross": "25000",
+      "month": 2,
+      "expect": "300.00"
+    },
+    {
+      "state": "19",
+      "gender": "male",
+      "gross": "12000",
+      "month": 9,
+      "expect": "110.00"
+    },
+    {
+      "state": "19",
+      "gender": "male",
+      "gross": "40000",
+      "month": 9,
+      "expect": "150.00"
+    },
+    {
+      "state": "19",
+      "gender": "male",
+      "gross": "40001",
+      "month": 9,
+      "expect": "200.00"
+    },
+    {
+      "state": "36",
+      "gender": "male",
+      "gross": "18000",
+      "month": 9,
+      "expect": "150.00"
+    },
+    {
+      "state": "07",
+      "gender": "male",
+      "gross": "50000",
+      "month": 9,
+      "expect": "0.00"
+    }
+  ],
+  "incomeTax": [
+    {
+      "name": "FY 2024-25 new regime: ₹7 lakh is fully rebated",
+      "fy": "2024-25",
+      "regime": "new",
+      "income": "700000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "700000.00",
+        "tax": "20000.00",
+        "rebate": "20000.00",
+        "surcharge": "0.00",
+        "cess": "0.00",
+        "total": "0.00"
+      }
+    },
+    {
+      "name": "FY 2024-25 new regime: marginal relief just above ₹7 lakh",
+      "fy": "2024-25",
+      "regime": "new",
+      "income": "710000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "710000.00",
+        "tax": "21000.00",
+        "rebate": "11000.00",
+        "surcharge": "0.00",
+        "cess": "400.00",
+        "total": "10400.00"
+      }
+    },
+    {
+      "name": "FY 2024-25 new regime: ₹15 lakh",
+      "fy": "2024-25",
+      "regime": "new",
+      "income": "1500000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "1500000.00",
+        "tax": "140000.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "5600.00",
+        "total": "145600.00"
+      }
+    },
+    {
+      "name": "new regime: ₹12 lakh is fully rebated",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "1200000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "1200000.00",
+        "tax": "60000.00",
+        "rebate": "60000.00",
+        "surcharge": "0.00",
+        "cess": "0.00",
+        "total": "0.00"
+      }
+    },
+    {
+      "name": "new regime: marginal relief just above ₹12 lakh",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "1210000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "1210000.00",
+        "tax": "61500.00",
+        "rebate": "51500.00",
+        "surcharge": "0.00",
+        "cess": "400.00",
+        "total": "10400.00"
+      }
+    },
+    {
+      "name": "new regime: past the marginal relief band",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "1275000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "1275000.00",
+        "tax": "71250.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "2850.00",
+        "total": "74100.00"
+      }
+    },
+    {
+      "name": "new regime: ₹20 lakh",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "2000000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "2000000.00",
+        "tax": "200000.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "8000.00",
+        "total": "208000.00"
+      }
+    },
+    {
+      "name": "new regime: ₹60 lakh with 10% surcharge",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "6000000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "6000000.00",
+        "tax": "1380000.00",
+        "rebate": "0.00",
+        "surcharge": "138000.00",
+        "cess": "60720.00",
+        "total": "1578720.00"
+      }
+    },
+    {
+      "name": "new regime: surcharge marginal relief just above ₹50 lakh",
+      "fy": "2026-27",
+      "regime": "new",
+      "income": "5010000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "5010000.00",
+        "tax": "1083000.00",
+        "rebate": "0.00",
+        "surcharge": "7000.00",
+        "cess": "43600.00",
+        "total": "1133600.00"
+      }
+    },
+    {
+      "name": "old regime: ₹5 lakh is fully rebated",
+      "fy": "2026-27",
+      "regime": "old",
+      "income": "500000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "500000.00",
+        "tax": "12500.00",
+        "rebate": "12500.00",
+        "surcharge": "0.00",
+        "cess": "0.00",
+        "total": "0.00"
+      }
+    },
+    {
+      "name": "old regime: ₹7 lakh",
+      "fy": "2026-27",
+      "regime": "old",
+      "income": "700000",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "700000.00",
+        "tax": "52500.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "2100.00",
+        "total": "54600.00"
+      }
+    },
+    {
+      "name": "old regime: senior citizen",
+      "fy": "2026-27",
+      "regime": "old",
+      "income": "700000",
+      "age": 65,
+      "expect": {
+        "taxableIncome": "700000.00",
+        "tax": "50000.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "2000.00",
+        "total": "52000.00"
+      }
+    },
+    {
+      "name": "old regime: very senior citizen",
+      "fy": "2026-27",
+      "regime": "old",
+      "income": "700000",
+      "age": 85,
+      "expect": {
+        "taxableIncome": "700000.00",
+        "tax": "40000.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "1600.00",
+        "total": "41600.00"
+      }
+    },
+    {
+      "name": "income and tax rounded to ₹10",
+      "fy": "2026-27",
+      "regime": "old",
+      "income": "1000005",
+      "age": 30,
+      "expect": {
+        "taxableIncome": "1000010.00",
+        "tax": "112503.00",
+        "rebate": "0.00",
+        "surcharge": "0.00",
+        "cess": "4500.12",
+        "total": "117000.00"
+      }
+    }
+  ],
+  "salaryTax": [
+    {
+      "name": "new regime: standard deduction only",
+      "input": {
+        "fy": "2026-27",
+        "regime": "new",
+        "age": 30,
+        "annualSalary": "1200000",
+        "annualBasicDa": "600000",
+        "annualHra": "240000",
+        "rentPaid": "0",
+        "metro": false,
+        "professionalTax": "2400",
+        "employeePf": "21600"
+      },
+      "expect": {
+        "hraExempt": "0.00",
+        "standardDeduction": "75000.00",
+        "chapterVIA": "0.00",
+        "taxableIncome": "1125000.00",
+        "total": "0.00"
+      }
+    },
+    {
+      "name": "old regime: HRA, PT, 80C (with PF) and 80D",
+      "input": {
+        "fy": "2026-27",
+        "regime": "old",
+        "age": 30,
+        "annualSalary": "1200000",
+        "annualBasicDa": "600000",
+        "annualHra": "240000",
+        "rentPaid": "300000",
+        "metro": true,
+        "professionalTax": "2500",
+        "employeePf": "21600",
+        "deductions": {
+          "c80": "150000",
+          "d80": "25000"
+        }
+      },
+      "expect": {
+        "hraExempt": "240000.00",
+        "standardDeduction": "50000.00",
+        "chapterVIA": "175000.00",
+        "taxableIncome": "732500.00",
+        "total": "61360.00"
+      }
+    }
+  ],
+  "monthlyTds": [
+    {
+      "annualTax": "61360",
+      "deductedSoFar": "30000",
+      "month": 10,
+      "expect": "5227.00"
+    },
+    {
+      "annualTax": "74100",
+      "deductedSoFar": "0",
+      "month": 4,
+      "expect": "6175.00"
+    },
+    {
+      "annualTax": "10000",
+      "deductedSoFar": "12000",
+      "month": 3,
+      "expect": "0.00"
+    }
+  ],
+  "payslips": [
+    {
+      "name": "3 days loss of pay, PF on half of gross, Maharashtra PT",
+      "input": {
+        "month": 9,
+        "daysInMonth": 30,
+        "lopDays": "3",
+        "components": [
+          {
+            "code": "BASIC",
+            "name": "Basic",
+            "monthly": "15000",
+            "pfWage": true
+          },
+          {
+            "code": "HRA",
+            "name": "HRA",
+            "monthly": "7500",
+            "hra": true
+          },
+          {
+            "code": "SPECIAL",
+            "name": "Special allowance",
+            "monthly": "7500"
+          }
+        ],
+        "pf": {
+          "member": true,
+          "epsEligible": true,
+          "onActualWages": false
+        },
+        "esiCovered": false,
+        "labourCodeWages": true,
+        "pt": {
+          "stateCode": "27",
+          "gender": "male"
+        },
+        "lwf": null,
+        "tds": "0"
+      },
+      "expect": {
+        "paidDays": "27",
+        "earned": [
+          "13500.00",
+          "6750.00",
+          "6750.00"
+        ],
+        "gross": "27000.00",
+        "pfWages": "13500.00",
+        "pfEmployee": "1620.00",
+        "eps": "1125.00",
+        "employerEpf": "495.00",
+        "esiEmployee": "0.00",
+        "pt": "200.00",
+        "lwfEmployee": "0.00",
+        "totalDeductions": "1820.00",
+        "netPay": "25180.00",
+        "employerContributions": "1756.00",
+        "costToCompany": "28756.00"
+      }
+    },
+    {
+      "name": "ESI-covered worker in February with LWF and an advance recovered",
+      "input": {
+        "month": 2,
+        "daysInMonth": 28,
+        "lopDays": "0",
+        "components": [
+          {
+            "code": "BASIC",
+            "name": "Basic",
+            "monthly": "9000",
+            "pfWage": true
+          },
+          {
+            "code": "HRA",
+            "name": "HRA",
+            "monthly": "3000",
+            "hra": true
+          },
+          {
+            "code": "CONV",
+            "name": "Conveyance",
+            "monthly": "1600"
+          }
+        ],
+        "pf": {
+          "member": true,
+          "epsEligible": true,
+          "onActualWages": false
+        },
+        "esiCovered": true,
+        "labourCodeWages": true,
+        "pt": {
+          "stateCode": "29",
+          "gender": "male"
+        },
+        "lwf": {
+          "employee": "20",
+          "employer": "40",
+          "months": [
+            2
+          ]
+        },
+        "tds": "0",
+        "otherDeductions": [
+          {
+            "name": "Salary advance",
+            "amount": "500"
+          }
+        ]
+      },
+      "expect": {
+        "paidDays": "28",
+        "earned": [
+          "9000.00",
+          "3000.00",
+          "1600.00"
+        ],
+        "gross": "13600.00",
+        "pfWages": "9000.00",
+        "pfEmployee": "1080.00",
+        "eps": "750.00",
+        "employerEpf": "330.00",
+        "esiEmployee": "102.00",
+        "pt": "0.00",
+        "lwfEmployee": "20.00",
+        "totalDeductions": "1702.00",
+        "netPay": "11898.00",
+        "employerContributions": "1652.00",
+        "costToCompany": "15252.00"
+      }
+    },
+    {
+      "name": "overtime counts for ESI, bonus does not; West Bengal PT",
+      "input": {
+        "month": 10,
+        "daysInMonth": 31,
+        "lopDays": "0",
+        "components": [
+          {
+            "code": "BASIC",
+            "name": "Basic",
+            "monthly": "15000",
+            "pfWage": true
+          },
+          {
+            "code": "HRA",
+            "name": "HRA",
+            "monthly": "5000",
+            "hra": true
+          },
+          {
+            "code": "SPECIAL",
+            "name": "Special allowance",
+            "monthly": "4000"
+          }
+        ],
+        "extraEarnings": [
+          {
+            "code": "OT",
+            "name": "Overtime",
+            "amount": "1500"
+          },
+          {
+            "code": "BONUS",
+            "name": "Bonus",
+            "amount": "2000",
+            "esiExcluded": true
+          }
+        ],
+        "pf": {
+          "member": true,
+          "epsEligible": true,
+          "onActualWages": false
+        },
+        "esiCovered": true,
+        "labourCodeWages": true,
+        "pt": {
+          "stateCode": "19",
+          "gender": "male"
+        },
+        "lwf": null,
+        "tds": "0"
+      },
+      "expect": {
+        "paidDays": "31",
+        "earned": [
+          "15000.00",
+          "5000.00",
+          "4000.00",
+          "1500.00",
+          "2000.00"
+        ],
+        "gross": "27500.00",
+        "pfWages": "15000.00",
+        "pfEmployee": "1800.00",
+        "eps": "1250.00",
+        "employerEpf": "550.00",
+        "esiEmployee": "192.00",
+        "pt": "150.00",
+        "lwfEmployee": "0.00",
+        "totalDeductions": "2142.00",
+        "netPay": "25358.00",
+        "employerContributions": "2779.00",
+        "costToCompany": "30279.00"
+      }
+    }
+  ],
+  "gratuity": [
+    {
+      "name": "7 years 5 months counts as 7",
+      "wages": "30000",
+      "joined": "2019-04-01",
+      "left": "2026-09-30",
+      "fixedTerm": false,
+      "expect": {
+        "years": 7,
+        "eligible": true,
+        "amount": "121154.00"
+      }
+    },
+    {
+      "name": "4 years 11 months rounds up to 5",
+      "wages": "30000",
+      "joined": "2021-10-01",
+      "left": "2026-09-30",
+      "fixedTerm": false,
+      "expect": {
+        "years": 5,
+        "eligible": true,
+        "amount": "86538.00"
+      }
+    },
+    {
+      "name": "under five years: none",
+      "wages": "30000",
+      "joined": "2024-01-15",
+      "left": "2026-09-30",
+      "fixedTerm": false,
+      "expect": {
+        "years": 3,
+        "eligible": false,
+        "amount": "0.00"
+      }
+    },
+    {
+      "name": "fixed-term employee after one year",
+      "wages": "30000",
+      "joined": "2024-01-15",
+      "left": "2026-09-30",
+      "fixedTerm": true,
+      "expect": {
+        "years": 3,
+        "eligible": true,
+        "amount": "51923.00"
+      }
+    },
+    {
+      "name": "capped at ₹20 lakh",
+      "wages": "500000",
+      "joined": "1996-04-01",
+      "left": "2026-04-01",
+      "fixedTerm": false,
+      "expect": {
+        "years": 30,
+        "eligible": true,
+        "amount": "2000000.00"
+      }
+    },
+    {
+      "name": "exactly 6 months over does not round up",
+      "wages": "26000",
+      "joined": "2020-01-10",
+      "left": "2026-07-10",
+      "fixedTerm": false,
+      "expect": {
+        "years": 6,
+        "eligible": true,
+        "amount": "90000.00"
+      }
+    },
+    {
+      "name": "6 months and 10 days rounds up",
+      "wages": "26000",
+      "joined": "2020-01-10",
+      "left": "2026-07-20",
+      "fixedTerm": false,
+      "expect": {
+        "years": 7,
+        "eligible": true,
+        "amount": "105000.00"
+      }
+    }
+  ],
+  "leaveEncashment": [
+    {
+      "days": "15",
+      "wages": "30000",
+      "divisor": 30,
+      "expect": "15000.00"
+    },
+    {
+      "days": "15",
+      "wages": "30000",
+      "divisor": 26,
+      "expect": "17308.00"
+    }
+  ],
+  "arrears": [
+    {
+      "name": "a 20% raise back-dated into a month with loss of pay",
+      "paid": [
+        {
+          "code": "BASIC",
+          "monthly": "15000",
+          "pfWage": true
+        },
+        {
+          "code": "HRA",
+          "monthly": "7500"
+        },
+        {
+          "code": "SPECIAL",
+          "monthly": "7500"
+        }
+      ],
+      "revised": [
+        {
+          "code": "BASIC",
+          "monthly": "18000",
+          "pfWage": true
+        },
+        {
+          "code": "HRA",
+          "monthly": "9000"
+        },
+        {
+          "code": "SPECIAL",
+          "monthly": "9000"
+        }
+      ],
+      "paidDays": "27.5",
+      "daysInMonth": 30,
+      "expect": {
+        "pfWage": "2750.00",
+        "other": "2750.00",
+        "total": "5500.00"
+      }
+    },
+    {
+      "name": "a new allowance added",
+      "paid": [
+        {
+          "code": "BASIC",
+          "monthly": "10000",
+          "pfWage": true
+        }
+      ],
+      "revised": [
+        {
+          "code": "BASIC",
+          "monthly": "10000",
+          "pfWage": true
+        },
+        {
+          "code": "CONV",
+          "monthly": "1600"
+        }
+      ],
+      "paidDays": "31",
+      "daysInMonth": 31,
+      "expect": {
+        "pfWage": "0.00",
+        "other": "1600.00",
+        "total": "1600.00"
+      }
+    },
+    {
+      "name": "a pay cut is not recovered",
+      "paid": [
+        {
+          "code": "BASIC",
+          "monthly": "20000",
+          "pfWage": true
+        }
+      ],
+      "revised": [
+        {
+          "code": "BASIC",
+          "monthly": "18000",
+          "pfWage": true
+        }
+      ],
+      "paidDays": "30",
+      "daysInMonth": 30,
+      "expect": {
+        "pfWage": "0.00",
+        "other": "0.00",
+        "total": "0.00"
+      }
+    },
+    {
+      "name": "prorated and rounded to the rupee",
+      "paid": [
+        {
+          "code": "BASIC",
+          "monthly": "10000",
+          "pfWage": true
+        }
+      ],
+      "revised": [
+        {
+          "code": "BASIC",
+          "monthly": "10100",
+          "pfWage": true
+        }
+      ],
+      "paidDays": "20",
+      "daysInMonth": 31,
+      "expect": {
+        "pfWage": "65.00",
+        "other": "0.00",
+        "total": "65.00"
+      }
+    }
+  ]
+}

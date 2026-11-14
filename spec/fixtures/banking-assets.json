@@ -1,0 +1,141 @@
+{
+  "_comment": "Phase 7 rules: book and income-tax depreciation, bank statement reading and matching, gateway settlements. Figures worked out by hand.",
+  "bookDepreciation": [
+    {
+      "name": "SLM laptop put to use mid-year: 57,000 over 3 years, 182 of 365 days",
+      "asset": { "cost": "60000", "method": "slm", "lifeYears": "3", "residualPct": "5", "putToUseOn": "2026-10-01" },
+      "period": { "fyStart": "2026-04-01", "fyEnd": "2027-03-31", "from": "2026-04-01", "to": "2027-03-31" },
+      "accumulatedAtFyStart": "0", "accumulatedBefore": "0",
+      "expect": { "amount": "9473.97", "days": 182 }
+    },
+    {
+      "name": "WDV car, first full year at 1 - 0.05^(1/8)",
+      "asset": { "cost": "800000", "method": "wdv", "lifeYears": "8", "residualPct": "5", "putToUseOn": "2026-04-01" },
+      "period": { "fyStart": "2026-04-01", "fyEnd": "2027-03-31", "from": "2026-04-01", "to": "2027-03-31" },
+      "accumulatedAtFyStart": "0", "accumulatedBefore": "0",
+      "expect": { "amount": "249875.18", "days": 365 }
+    },
+    {
+      "name": "WDV car, second year (leap year, 366 days) on the written down value",
+      "asset": { "cost": "800000", "method": "wdv", "lifeYears": "8", "residualPct": "5", "putToUseOn": "2026-04-01" },
+      "period": { "fyStart": "2027-04-01", "fyEnd": "2028-03-31", "from": "2027-04-01", "to": "2028-03-31" },
+      "accumulatedAtFyStart": "249875.18", "accumulatedBefore": "249875.18",
+      "expect": { "amount": "171828.17", "days": 366 }
+    },
+    {
+      "name": "stops at the residual value",
+      "asset": { "cost": "10000", "method": "slm", "lifeYears": "3", "residualPct": "5", "putToUseOn": "2024-04-01" },
+      "period": { "fyStart": "2026-04-01", "fyEnd": "2027-03-31", "from": "2026-04-01", "to": "2027-03-31" },
+      "accumulatedAtFyStart": "9000", "accumulatedBefore": "9000",
+      "expect": { "amount": "500.00", "days": 365 }
+    },
+    {
+      "name": "sold on 30 June: 91 days of 11,400 a year",
+      "asset": { "cost": "120000", "method": "slm", "lifeYears": "10", "residualPct": "5", "putToUseOn": "2025-04-01", "disposedOn": "2026-06-30" },
+      "period": { "fyStart": "2026-04-01", "fyEnd": "2027-03-31", "from": "2026-04-01", "to": "2027-03-31" },
+      "accumulatedAtFyStart": "11400", "accumulatedBefore": "11400",
+      "expect": { "amount": "2842.19", "days": 91 }
+    },
+    {
+      "name": "a monthly run: October only",
+      "asset": { "cost": "60000", "method": "slm", "lifeYears": "3", "residualPct": "5", "putToUseOn": "2026-10-01" },
+      "period": { "fyStart": "2026-04-01", "fyEnd": "2027-03-31", "from": "2026-10-01", "to": "2026-10-31" },
+      "accumulatedAtFyStart": "0", "accumulatedBefore": "0",
+      "expect": { "amount": "1613.70", "days": 31 }
+    }
+  ],
+  "disposal": { "cost": "120000", "accumulated": "14242.19", "saleValue": "100000", "expect": { "bookValue": "105757.81", "profit": "-5757.81" } },
+  "itBlocks": [
+    {
+      "name": "computers 40%: an addition used under 180 days gets half the rate, sales come off first",
+      "block": { "rate": "40", "openingWdv": "100000", "additions": [{ "cost": "50000", "putToUseOn": "2026-06-01" }, { "cost": "30000", "putToUseOn": "2026-12-15" }], "sales": ["20000"] },
+      "fyEnd": "2027-03-31",
+      "expect": { "openingWdv": "100000.00", "additionsFullRate": "50000.00", "additionsHalfRate": "30000.00", "sales": "20000.00", "depreciation": "58000.00", "closingWdv": "102000.00", "shortTermGain": "0.00", "shortTermLoss": "0.00" }
+    },
+    {
+      "name": "the 180-day line: 3 October is 180 days to 31 March, 4 October is 179",
+      "block": { "rate": "15", "openingWdv": "0", "additions": [{ "cost": "10000", "putToUseOn": "2026-10-03" }, { "cost": "10000", "putToUseOn": "2026-10-04" }], "sales": [] },
+      "fyEnd": "2027-03-31",
+      "expect": { "additionsFullRate": "10000.00", "additionsHalfRate": "10000.00", "depreciation": "2250.00", "closingWdv": "17750.00" }
+    },
+    {
+      "name": "sales above the block's value: short-term capital gain, no depreciation",
+      "block": { "rate": "15", "openingWdv": "10000", "additions": [], "sales": ["25000"] },
+      "fyEnd": "2027-03-31",
+      "expect": { "depreciation": "0.00", "closingWdv": "0.00", "shortTermGain": "15000.00" }
+    },
+    {
+      "name": "every asset of the block sold: the rest is a short-term capital loss",
+      "block": { "rate": "15", "openingWdv": "40000", "additions": [], "sales": ["30000"], "blockCeases": true },
+      "fyEnd": "2027-03-31",
+      "expect": { "depreciation": "0.00", "closingWdv": "0.00", "shortTermLoss": "10000.00" }
+    }
+  ],
+  "statements": [
+    {
+      "name": "HDFC layout: account details above the table, separate withdrawal and deposit columns, a footer",
+      "csv": "HDFC BANK Ltd.,,,,,,\nAccount No : XXXXXXXX1234,,,,,,\nDate,Narration,Chq./Ref.No.,Value Dt,Withdrawal Amt.,Deposit Amt.,Closing Balance\n01/10/26,UPI-SHARMA TRADERS-SHARMA@OKSBI-SBIN0001234-627412345678-PAYMENT,0000627412345678,01/10/26,,\"12,500.00\",\"1,12,500.00\"\n03/10/26,NEFT DR-ICIC0000123-ANAND DAIRY-NETBANK-N276262012345678,N276262012345678,03/10/26,\"8,000.00\",,\"1,04,500.00\"\n05/10/26,CHQ PAID-000123-RAJ ELECTRICALS,000123,05/10/26,\"2,360.00\",,\"1,02,140.00\"\n31/10/26,SMS CHARGES FOR OCT,,31/10/26,17.70,,\"1,02,122.30\"\n,,,,,,\n*** End of statement ***\n",
+      "expect": {
+        "from": "2026-10-01", "to": "2026-10-31", "skipped": 1,
+        "lines": [
+          { "date": "2026-10-01", "description": "UPI-SHARMA TRADERS-SHARMA@OKSBI-SBIN0001234-627412345678-PAYMENT", "reference": "0000627412345678", "debit": "0.00", "credit": "12500.00", "balance": "112500.00" },
+          { "date": "2026-10-03", "description": "NEFT DR-ICIC0000123-ANAND DAIRY-NETBANK-N276262012345678", "reference": "N276262012345678", "debit": "8000.00", "credit": "0.00", "balance": "104500.00" },
+          { "date": "2026-10-05", "description": "CHQ PAID-000123-RAJ ELECTRICALS", "reference": "000123", "debit": "2360.00", "credit": "0.00", "balance": "102140.00" },
+          { "date": "2026-10-31", "description": "SMS CHARGES FOR OCT", "reference": null, "debit": "17.70", "credit": "0.00", "balance": "102122.30" }
+        ]
+      }
+    },
+    {
+      "name": "ICICI layout: one amount column with Cr/Dr, dates like 05-Oct-2026",
+      "csv": "Transaction Date,Transaction Remarks,Amount (INR),Cr/Dr,Balance(INR)\n05-Oct-2026,IMPS/P2A/627812345678/MEERA,\"1,500.00\",DR,\"98,500.00\"\n06-Oct-2026,INT PD 01-07-2026 TO 30-09-2026,245.00,CR,\"98,745.00\"\n",
+      "expect": {
+        "from": "2026-10-05", "to": "2026-10-06", "skipped": 0,
+        "lines": [
+          { "date": "2026-10-05", "description": "IMPS/P2A/627812345678/MEERA", "reference": null, "debit": "1500.00", "credit": "0.00", "balance": "98500.00" },
+          { "date": "2026-10-06", "description": "INT PD 01-07-2026 TO 30-09-2026", "reference": null, "debit": "0.00", "credit": "245.00", "balance": "98745.00" }
+        ]
+      }
+    }
+  ],
+  "matching": {
+    "lines": [
+      { "id": "L1", "date": "2026-10-01", "description": "UPI-SHARMA TRADERS-SHARMA@OKSBI-SBIN0001234-627412345678-PAYMENT", "reference": "0000627412345678", "debit": "0.00", "credit": "12500.00" },
+      { "id": "L2", "date": "2026-10-03", "description": "NEFT DR-ICIC0000123-ANAND DAIRY-NETBANK-N276262012345678", "reference": "N276262012345678", "debit": "8000.00", "credit": "0.00" },
+      { "id": "L3", "date": "2026-10-05", "description": "CHQ PAID-000123-RAJ ELECTRICALS", "reference": "000123", "debit": "2360.00", "credit": "0.00" },
+      { "id": "L4", "date": "2026-10-31", "description": "SMS CHARGES FOR OCT", "reference": null, "debit": "17.70", "credit": "0.00" },
+      { "id": "L5", "date": "2026-10-06", "description": "CASH DEP BRANCH", "reference": null, "debit": "0.00", "credit": "500.00" }
+    ],
+    "entries": [
+      { "id": "E1", "date": "2026-09-30", "direction": "in", "amount": "12500.00", "number": "R/26-27/00012", "reference": "627412345678", "narration": null, "party": "Sharma Traders" },
+      { "id": "E2", "date": "2026-10-03", "direction": "out", "amount": "8000.00", "number": "P/26-27/00007", "reference": null, "narration": null, "party": "Anand Dairy" },
+      { "id": "E3", "date": "2026-10-02", "direction": "out", "amount": "2360.00", "number": "P/26-27/00008", "reference": "000123", "narration": "Cheque to Raj", "party": "Raj Electricals" },
+      { "id": "E4", "date": "2026-10-05", "direction": "out", "amount": "2360.00", "number": "P/26-27/00009", "reference": null, "narration": null, "party": "Other Vendor" },
+      { "id": "E6", "date": "2026-10-06", "direction": "in", "amount": "500.00", "number": "R/26-27/00020", "reference": null, "narration": null, "party": null },
+      { "id": "E7", "date": "2026-10-06", "direction": "in", "amount": "500.00", "number": "R/26-27/00021", "reference": null, "narration": null, "party": null }
+    ],
+    "expect": [
+      { "lineId": "L1", "entryId": "E1", "score": 107, "reasons": ["amount", "reference", "party"], "sure": true },
+      { "lineId": "L3", "entryId": "E3", "score": 101, "reasons": ["amount", "reference", "party"], "sure": true },
+      { "lineId": "L2", "entryId": "E2", "score": 70, "reasons": ["amount", "same_day", "party"], "sure": true },
+      { "lineId": "L5", "entryId": "E6", "score": 50, "reasons": ["amount", "same_day"], "sure": false }
+    ]
+  },
+  "rules": {
+    "rules": [
+      { "id": "r2", "contains": "int pd", "direction": "in", "accountId": "interest", "priority": 2 },
+      { "id": "r1", "contains": "sms charges", "direction": "out", "accountId": "bank_charges", "priority": 1 }
+    ],
+    "cases": [
+      { "line": { "description": "SMS CHARGES FOR OCT", "debit": "17.70", "credit": "0.00" }, "expect": "r1" },
+      { "line": { "description": "INT PD 01-07-2026 TO 30-09-2026", "debit": "0.00", "credit": "245.00" }, "expect": "r2" },
+      { "line": { "description": "SMS CHARGES REVERSED", "debit": "0.00", "credit": "17.70" }, "expect": null }
+    ]
+  },
+  "settlements": {
+    "csv": "entity_id,type,debit,credit,amount,currency,fee,tax,on_hold,settled,created_at,settled_at,settlement_id,description,notes,payment_id,arn,settlement_utr,order_id,order_receipt,method\npay_A,payment,0,982.3,1000,INR,17.7,2.7,0,1,2026-10-01 10:00:00,2026-10-03 09:00:00,setl_1,,,,,UTR111,,,upi\npay_B,payment,0,491.15,500,INR,8.85,1.35,0,1,2026-10-01 12:00:00,2026-10-03 09:00:00,setl_1,,,,,UTR111,,,card\nrfnd_C,refund,200,0,200,INR,0,0,0,1,2026-10-02 12:00:00,2026-10-03 09:00:00,setl_1,,,pay_X,,UTR111,,,upi\npay_D,payment,0,2455.75,2500,INR,44.25,6.75,0,1,2026-10-02 10:00:00,2026-10-04 09:00:00,setl_2,,,,,UTR222,,,upi\n",
+    "expect": [
+      { "settlementId": "setl_1", "utr": "UTR111", "settledOn": "2026-10-03", "payments": 2, "gross": "1500.00", "refunds": "200.00", "fees": "22.50", "tax": "4.05", "adjustments": "0.00", "net": "1273.45" },
+      { "settlementId": "setl_2", "utr": "UTR222", "settledOn": "2026-10-04", "payments": 1, "gross": "2500.00", "refunds": "0.00", "fees": "37.50", "tax": "6.75", "adjustments": "0.00", "net": "2455.75" }
+    ]
+  }
+}

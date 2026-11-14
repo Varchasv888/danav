@@ -1,0 +1,556 @@
+@import "tailwindcss";
+
+/* Varchasv ERP: a deep navy feature rail, light work surfaces, clear blue actions, and teal for posted/verified.
+   Glass and soft elevation are limited to overlays and a few summary surfaces; tables and forms stay opaque. */
+:root {
+  --bg: #f8fafc;          /* canvas */
+  --surface: #ffffff;     /* work surface */
+  --surface-2: #f1f5f9;   /* row hover, pressed, inactive */
+  --surface-3: #f8fafc;   /* table heads, totals */
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --rule: #f1f5f9;        /* rows inside tables */
+  --text: #0f172a;
+  --text-secondary: #334155; /* field labels, table text */
+  --muted: #64748b;
+  --faint: #66758b;
+  --primary: #1d4ed8;     /* interactive blue; 5.9:1 on white */
+  --primary-hover: #1e40af;
+  --on-primary: #ffffff;
+  --primary-soft: #eff6ff;
+  --navy: #0f2742;        /* shell, active navigation, strong headers */
+  --navy-deep: #0a1c31;
+  --on-navy: #ffffff;
+  --rail: #0f2742;
+  --rail-hover: #17335a;
+  --rail-active: #1e3a5f;
+  --rail-text: #f5f8fc;
+  --rail-muted: #b5c2d2;
+  --khata: #173b63;       /* brand mark */
+  --teal: #0f766e;        /* posted, verified, synced; 5.5:1 as text on white */
+  --teal-soft: #ccfbf1;
+  --accent: #b45309;      /* warning */
+  --accent-soft: #fef3c7;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --on-danger: #ffffff;
+  --ring: #1d4ed8;
+  --focus-halo: rgb(29 78 216 / 0.2);
+  --kbd-bg: #f1f5f9;
+  --kbd-border: #cbd5e1;
+  --kbd-text: #475569;
+  --shadow: 0 4px 12px rgb(15 23 42 / 0.08);
+  /* Boundary of a field or control: 3.4:1 against the surface, the WCAG 1.4.11 minimum is 3:1. Row rules and card edges stay light. */
+  --border-input: #8393a8;
+  --border-input-hover: #64748b;
+  --shadow-focus: 0 0 0 4px var(--focus-halo);
+  --shadow-focus-danger: 0 0 0 4px rgb(220 38 38 / 0.18);
+  --shadow-flyout: 0 12px 28px -4px rgb(15 23 42 / 0.16), 0 4px 12px -2px rgb(15 23 42 / 0.08);
+  /* Elevation: two steps only. Cards sit on a rule, not a shadow; overlays (menus, palettes, dialogs) take the second. */
+  --shadow-1: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-2: 0 8px 24px rgb(15 23 42 / 0.14);
+  --shadow-neu: 3px 4px 12px rgb(15 39 66 / 0.07), -2px -2px 8px rgb(255 255 255 / 0.8);
+  --inset-neu: inset 1px 1px 3px rgb(15 39 66 / 0.08), inset -1px -1px 3px rgb(255 255 255 / 0.75);
+  /* Glass, for overlays and dashboard summary cards only; never behind dense tables or form fields. */
+  --glass: rgb(255 255 255 / 0.88);
+  --glass-edge: rgb(255 255 255 / 0.72);
+  /* Chart series, in this fixed order: the dataviz reference palette, run through its validator on our surfaces (light #ffffff, dark #10203a): lightness band, chroma floor, adjacent colour-blind separation (worst 9.1 light, 8.4 dark) and normal-vision separation (worst 19.6, 19.3) all pass. Three light colours sit under 3:1 on white, so every chart carries direct labels or a table view; colour is never the only carrier. */
+  --chart-1: #2a78d6; --chart-2: #eb6834; --chart-3: #1baf7a; --chart-4: #eda100; --chart-5: #e87ba4; --chart-6: #008300;
+  /* One tone per section: its icon chip, create icons and tab dot. Never used for text. */
+  --mod-workspace: #2068b4; --mod-masters: #0f766e; --mod-inventory: #b45309; --mod-procurement: #7c3aed; --mod-sales: #15803d; --mod-accounting: #0e7490; --mod-gst: #4338ca; --mod-crm: #0369a1; --mod-finance: #a16207; --mod-admin: #475569; --mod-reports: #be185d; --mod-utilities: #78716c;
+  /* The same tones for the dark rail: light enough for 3:1 on the rail in both themes. */
+  --modr-workspace: #5da2fd; --modr-masters: #44b5a8; --modr-inventory: #fb923c; --modr-procurement: #a78bfa; --modr-sales: #4ade80; --modr-accounting: #22d3ee; --modr-gst: #818cf8; --modr-crm: #38bdf8; --modr-finance: #facc15; --modr-admin: #94a3b8; --modr-reports: #f472b6; --modr-utilities: #a8a29e;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #090d16;
+    --surface: #111827;
+    --surface-2: #1f2937;
+    --surface-3: #162033;
+    --border: #243043;
+    --border-strong: #374151;
+    --rule: #1b2434;
+    --text: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --muted: #94a3b8;
+    --faint: #8696ac;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --on-primary: #090d16;
+    --primary-soft: #1e293b;
+    --navy: #070d18;
+    --navy-deep: #050a12;
+    --rail: #070d18;
+    --rail-hover: #0e1a2c;
+    --rail-active: #132338;
+    --rail-text: #e2e8f0;
+    --rail-muted: #a6b4c7;
+    --khata: #5da2fd;
+    --teal: #44b5a8;
+    --teal-soft: #0f3a37;
+    --accent: #f5b544;
+    --accent-soft: #3a2c0f;
+    --success: #4ade80;
+    --success-soft: #12301f;
+    --danger: #f87171;
+    --danger-soft: #3b1a1d;
+    --on-danger: #0b1626;
+    --ring: #3b82f6;
+    --focus-halo: rgb(59 130 246 / 0.25);
+    --kbd-bg: #162a47;
+    --kbd-border: #2e4870;
+    --kbd-text: #cbd5e1;
+    --shadow: 0 4px 16px rgb(0 0 0 / 0.45);
+    --border-input: #6b7a90;
+    --border-input-hover: #94a3b8;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 8px 28px rgb(0 0 0 / 0.55);
+    --shadow-neu: 2px 3px 10px rgb(0 0 0 / 0.3), -1px -1px 5px rgb(255 255 255 / 0.035);
+    --inset-neu: inset 1px 1px 3px rgb(0 0 0 / 0.28), inset -1px -1px 2px rgb(255 255 255 / 0.035);
+    --glass: rgb(16 32 58 / 0.92);
+    --glass-edge: rgb(255 255 255 / 0.08);
+    --chart-1: #3987e5; --chart-2: #d95926; --chart-3: #199e70; --chart-4: #c98500; --chart-5: #d55181; --chart-6: #008300;
+    /* One tone per section: its icon chip, create icons and tab dot. Never used for text. */
+    --mod-workspace: #5da2fd; --mod-masters: #44b5a8; --mod-inventory: #fb923c; --mod-procurement: #a78bfa; --mod-sales: #4ade80; --mod-accounting: #22d3ee; --mod-gst: #818cf8; --mod-crm: #38bdf8; --mod-finance: #facc15; --mod-admin: #94a3b8; --mod-reports: #f472b6; --mod-utilities: #a8a29e;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #090d16;
+  --surface: #111827;
+  --surface-2: #1f2937;
+  --surface-3: #162033;
+  --border: #243043;
+  --border-strong: #374151;
+  --rule: #1b2434;
+  --text: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --muted: #94a3b8;
+  --faint: #8696ac;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --on-primary: #090d16;
+  --primary-soft: #1e293b;
+  --navy: #070d18;
+  --navy-deep: #050a12;
+  --rail: #070d18;
+  --rail-hover: #0e1a2c;
+  --rail-active: #132338;
+  --rail-text: #e2e8f0;
+  --rail-muted: #a6b4c7;
+  --khata: #5da2fd;
+  --teal: #44b5a8;
+  --teal-soft: #0f3a37;
+  --accent: #f5b544;
+  --accent-soft: #3a2c0f;
+  --success: #4ade80;
+  --success-soft: #12301f;
+  --danger: #f87171;
+  --danger-soft: #3b1a1d;
+  --on-danger: #0b1626;
+  --ring: #3b82f6;
+  --focus-halo: rgb(59 130 246 / 0.25);
+  --kbd-bg: #162a47;
+  --kbd-border: #2e4870;
+  --kbd-text: #cbd5e1;
+  --shadow: 0 4px 16px rgb(0 0 0 / 0.45);
+  --border-input: #6b7a90;
+  --border-input-hover: #94a3b8;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-2: 0 8px 28px rgb(0 0 0 / 0.55);
+  --shadow-neu: 2px 3px 10px rgb(0 0 0 / 0.3), -1px -1px 5px rgb(255 255 255 / 0.035);
+  --inset-neu: inset 1px 1px 3px rgb(0 0 0 / 0.28), inset -1px -1px 2px rgb(255 255 255 / 0.035);
+  --glass: rgb(16 32 58 / 0.92);
+  --glass-edge: rgb(255 255 255 / 0.08);
+  --chart-1: #3987e5; --chart-2: #d95926; --chart-3: #199e70; --chart-4: #c98500; --chart-5: #d55181; --chart-6: #008300;
+  /* One tone per section: its icon chip, create icons and tab dot. Never used for text. */
+  --mod-workspace: #5da2fd; --mod-masters: #44b5a8; --mod-inventory: #fb923c; --mod-procurement: #a78bfa; --mod-sales: #4ade80; --mod-accounting: #22d3ee; --mod-gst: #818cf8; --mod-crm: #38bdf8; --mod-finance: #facc15; --mod-admin: #94a3b8; --mod-reports: #f472b6; --mod-utilities: #a8a29e;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-rule: var(--rule);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-on-navy: var(--on-navy);
+  --color-rail: var(--rail);
+  --color-rail-hover: var(--rail-hover);
+  --color-rail-active: var(--rail-active);
+  --color-rail-text: var(--rail-text);
+  --color-rail-muted: var(--rail-muted);
+  --color-khata: var(--khata);
+  --color-teal: var(--teal);
+  --color-teal-soft: var(--teal-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-on-danger: var(--on-danger);
+  --color-ring: var(--ring);
+  --color-border-input: var(--border-input);
+  --color-glass: var(--glass);
+  --color-glass-edge: var(--glass-edge);
+  --color-chart-1: var(--chart-1); --color-chart-2: var(--chart-2); --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4); --color-chart-5: var(--chart-5); --color-chart-6: var(--chart-6);
+  --shadow-raised: var(--shadow-1);
+  --shadow-overlay: var(--shadow-2);
+  --shadow-soft: var(--shadow-neu);
+  --shadow-inset: var(--inset-neu);
+  --shadow-card: var(--shadow);
+  /* Corners: 3px key chips, 4px badges, 6px compact buttons, 8px inputs, cards and dialogs, 12px flyouts and drawers. */
+  --radius-xs: 0.1875rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --shadow-flyout: var(--shadow-flyout);
+  --color-border-input-hover: var(--border-input-hover);
+  --color-text-secondary: var(--text-secondary);
+  --color-focus-halo: var(--focus-halo);
+  /* Local fontsource assets keep production builds independent of Google Fonts access. */
+  --font-sans: "Inter Variable", "Anek Devanagari Variable", "Anek Gujarati Variable",
+    "Anek Bangla Variable", "Anek Tamil Variable", "Anek Telugu Variable",
+    "Anek Kannada Variable", "Anek Malayalam Variable", "Anek Gurmukhi Variable",
+    "Anek Odia Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Motion: three budgets (micro 120ms, swift 200ms, moderate 280ms) and three curves. Nothing blocks typing; every animation is off under reduced motion. */
+@theme {
+  --ease-spring-snap: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --animate-focus-pulse: focus-pulse 400ms ease-out;
+  --animate-row-enter: row-enter 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-count-up: count-up 150ms ease-out;
+  --animate-shimmer: shimmer 1.5s infinite linear;
+  --animate-shake: shake 160ms ease-in-out;
+  --animate-pop-in: pop-in 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-right: slide-in-right 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-toast-in: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  @keyframes focus-pulse { 0% { box-shadow: 0 0 0 0 rgb(29 78 216 / 0.35); } 70% { box-shadow: 0 0 0 6px rgb(29 78 216 / 0); } 100% { box-shadow: 0 0 0 0 rgb(29 78 216 / 0); } }
+  @keyframes row-enter { 0% { opacity: 0; transform: translateY(-6px) scale(0.99); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes count-up { 0% { transform: translateY(4px); opacity: 0.6; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+  @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 50% { transform: translateX(2px); } 75% { transform: translateX(-2px); } }
+  @keyframes pop-in { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+  @keyframes slide-in-right { 0% { transform: translateX(100%); } 100% { transform: translateX(0); } }
+  @keyframes toast-in { 0% { opacity: 0; transform: translateY(16px); } 100% { opacity: 1; transform: translateY(0); } }
+}
+
+@layer components {
+  /* Soft elevation is reserved for compact summary surfaces. Dense tables remain opaque and high contrast. */
+  .surface-raised {
+    box-shadow: var(--shadow-neu);
+  }
+  .glass-panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    box-shadow: var(--shadow-1);
+    backdrop-filter: blur(14px);
+  }
+  .inset-control {
+    box-shadow: var(--inset-neu);
+  }
+}
+
+/* Dense by default: the whole interface is set from a 14px root on a desk screen, 15px on phones so
+   fields stay readable and do not zoom. */
+html {
+  font-size: 15px;
+}
+@media (min-width: 1024px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* The navy shell (top bar, sign-in panel). Components inside read the same token names. */
+.cover {
+  --surface: rgb(255 255 255 / 0.08);
+  --surface-2: rgb(255 255 255 / 0.12);
+  --border: rgb(255 255 255 / 0.16);
+  --text: #ffffff;
+  --muted: #a8c8f8;
+  --primary: #ffffff;
+  --primary-soft: rgb(255 255 255 / 0.1);
+  --primary-hover: #ffffff;
+  --on-primary: #173b63;
+  --ring: #a8c8f8;
+  --kbd-bg: rgb(255 255 255 / 0.1);
+  --kbd-border: rgb(255 255 255 / 0.22);
+  --kbd-text: #d3e3ff;
+  background: var(--navy);
+  color: var(--text);
+  /* One tone per section: its icon chip, create icons and tab dot. Never used for text. */
+  --mod-workspace: #5da2fd; --mod-masters: #44b5a8; --mod-inventory: #fb923c; --mod-procurement: #a78bfa; --mod-sales: #4ade80; --mod-accounting: #22d3ee; --mod-gst: #818cf8; --mod-crm: #38bdf8; --mod-finance: #facc15; --mod-admin: #94a3b8; --mod-reports: #f472b6; --mod-utilities: #a8a29e;
+  color-scheme: dark;
+}
+
+.margin-rule {
+  border-right: 1px solid var(--navy-deep);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9286rem;
+  line-height: 1.45;
+  font-feature-settings: "cv05" 1;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+/* Money, quantities and codes: aligned digits and a slashed zero wherever they appear. */
+.num,
+td,
+th,
+kbd {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "zero" 1, "cv05" 1;
+}
+/* An amount never breaks across lines (the rupee sign stays with its figure). */
+.num {
+  white-space: nowrap;
+}
+
+/* Data tables: quiet heads on a tint, single-pixel row rules. */
+table thead tr {
+  background: var(--surface-3);
+}
+table th {
+  font-weight: 600;
+  font-size: 0.8125em;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+tbody tr {
+  border-color: var(--rule);
+}
+tbody tr:hover {
+  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
+}
+
+/* Keycaps: the function key belongs on the button it presses. */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--kbd-border);
+  background: var(--kbd-bg);
+  color: var(--kbd-text);
+  border-radius: 3px;
+  padding: 0 0.3em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+  font-family: inherit;
+}
+
+/* No scrollbars anywhere. Everything still scrolls (wheel, trackpad, touch, keyboard, Page keys); only the bar is hidden. */
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Phones: controls are big enough for a thumb (40px; the bottom bar and sheets use 44px) and fields are 16px so the browser never zooms in on focus. */
+@media (max-width: 767px) {
+  main :where(button, select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="file"])) {
+    min-height: 2.75rem;
+  }
+  main :where(select, textarea, input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="file"])) {
+    font-size: 16px;
+  }
+  main :where(input[type="checkbox"], input[type="radio"]) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  /* A table that must scroll sideways keeps its first column in view. */
+  main :where(table) :where(th:first-child, td:first-child) {
+    position: sticky;
+    left: 0;
+    background: var(--surface);
+  }
+}
+
+/* Phone: a table that PhoneTables marked becomes a stack of cards, one per row, with each cell under its column name. */
+@media (max-width: 767px) {
+  /* Until PhoneTables has seen a table with three or more columns it stays invisible, so the wide layout never flashes. */
+  main table:has(thead tr > :nth-child(3)):not([data-phone]):not([data-no-stack]) { visibility: hidden; }
+  table[data-stack] { display: block; min-width: 0 !important; width: 100%; }
+  table[data-stack] thead { display: none; }
+  table[data-stack] tbody, table[data-stack] tfoot { display: block; }
+  table[data-stack] tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 0.75rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+  }
+  table[data-stack] tfoot tr { border-top: 1px solid var(--border-strong); font-weight: 600; }
+  table[data-stack] td, table[data-stack] th {
+    display: block;
+    min-width: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+  }
+  table[data-stack] td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.125rem;
+    font-size: 0.8571rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  /* The first cell is the card's title; a cell with nothing in it is left out. */
+  table[data-stack] td:first-child { grid-column: 1 / -1; font-weight: 600; font-size: 1rem; }
+  table[data-stack] td:first-child[data-label]::before { display: none; }
+  table[data-stack] td[data-label=""] { grid-column: 1 / -1; }
+  table[data-stack] td:empty { display: none; }
+}
+
+/* Any screen printed straight from the app (a report, a register) goes on A4 with an even margin; print pages set their own paper. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--ring) 26%, transparent);
+}
+
+/* Focus: keyboard users get a clear ring on everything; a click does not draw one. Fields light their border and a soft halo instead of an outline. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-focus);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="combobox"]:focus-visible {
+  border-color: var(--ring);
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+/* A table cell being edited is enclosed inside the cell, so scrolling never clips it. */
+td:focus-visible,
+[role="gridcell"]:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ring);
+  background-color: var(--primary-soft);
+}
+
+/* Reduced motion: no animation, no transition, no spring; popovers, drawers and menus simply appear. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-state="open"],
+  [data-state="visible"] {
+    opacity: 1 !important;
+  }
+}
+
+/* The one orchestrated moment: the Go to palette rises into place. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.wordmark {
+  letter-spacing: -0.01em;
+}
+
+/* Line tables ("ghost until focused"): a cell reads as plain text, a faint dashed edge appears when the row is hovered, and the cell becomes a field when it is entered. */
+table[data-grid] tbody :where(input, select):not(:focus):not([aria-invalid="true"]) {
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+}
+table[data-grid] tbody tr:hover :where(input, select):not(:focus):not([aria-invalid="true"]):not(:disabled) {
+  border-style: dashed;
+  border-color: color-mix(in oklab, var(--border-input) 55%, transparent);
+}
+table[data-grid] tbody :where(input, select):focus {
+  background-color: var(--surface);
+}
+
+@keyframes toast-bar {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Pages that fit one screen: the content area is the window's height minus the top bar, the tab strip and the page padding. */
+:root { --chrome-h: 8.9rem; }
+@media (min-width: 1024px) {
+  .fit-screen {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--chrome-h));
+    min-height: 0;
+  }
+  .fit-screen > header { margin-bottom: 0.5rem; flex-shrink: 0; }
+  .fit-screen > header h1 { font-size: 1.15rem; }
+  .fit-screen > header p { display: none; }
+}
+
+/* Voucher grids: ruled cells and a quiet header, the same frame on every document. */
+table[data-voucher] { border-collapse: collapse; }
+table[data-voucher] :is(th, td) { border: 1px solid var(--border); }
+table[data-voucher] th { background: var(--surface-3); font-size: 0.75rem; letter-spacing: 0.03em; text-transform: uppercase; }

@@ -1,0 +1,89 @@
+{
+  "rules": [
+    {
+      "action": "account.upsert",
+      "mode": "allowed",
+      "note": "Add or edit a customer or supplier."
+    },
+    {
+      "action": "voucher.create",
+      "mode": "allowed",
+      "note": "Receipts, payments, journals and contras."
+    },
+    {
+      "action": "voucher.cancel",
+      "mode": "allowed",
+      "note": "Cancel a voucher; the server reverses it once."
+    },
+    {
+      "action": "attendance.mark",
+      "mode": "allowed",
+      "note": "Mark attendance."
+    },
+    {
+      "action": "leave.request",
+      "mode": "allowed",
+      "note": "Ask for leave."
+    },
+    {
+      "action": "pos.bill",
+      "mode": "allowed",
+      "note": "Counter bills, with the numbers the device was given."
+    },
+    {
+      "action": "expense.claim",
+      "mode": "allowed",
+      "note": "Submit an expense claim."
+    },
+    {
+      "action": "sales.order",
+      "mode": "allowed",
+      "note": "Take a sales order."
+    },
+    {
+      "action": "stock.count",
+      "mode": "allowed",
+      "note": "Count stock by scanning, as a spot check."
+    },
+    {
+      "action": "masters.items",
+      "mode": "read_only",
+      "note": "Items, prices and stock as of the last sync."
+    },
+    {
+      "action": "masters.parties",
+      "mode": "read_only",
+      "note": "Customers and their balances as of the last sync."
+    },
+    {
+      "action": "pos.coupon",
+      "mode": "online_only",
+      "note": "Discount cards and coupons are checked against the server."
+    },
+    {
+      "action": "pos.giftVoucher",
+      "mode": "online_only",
+      "note": "Gift voucher balances must be checked and spent on the server."
+    },
+    {
+      "action": "gst.einvoice",
+      "mode": "online_only",
+      "note": "E-invoice and e-way bill calls go to the tax portal."
+    },
+    {
+      "action": "team.admin",
+      "mode": "online_only",
+      "note": "Inviting people and changing roles."
+    },
+    {
+      "action": "settings.locks",
+      "mode": "online_only",
+      "note": "Period locks and numbering."
+    },
+    {
+      "action": "settings.backup",
+      "mode": "online_only",
+      "note": "Exporting or restoring the business's data."
+    }
+  ]
+}

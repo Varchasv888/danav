@@ -1,0 +1,1 @@
+ALTER TABLE "stock_counts" ADD COLUMN "verify_only" boolean DEFAULT false NOT NULL;

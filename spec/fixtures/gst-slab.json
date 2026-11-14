@@ -1,0 +1,59 @@
+{
+  "description": "Price-based GST (apparel and footwear). Both packages/domain (TS) and the Flutter app (Dart) must produce exactly these outputs. The per-piece value is after discounts and before GST.",
+  "slabRate": [
+    { "slab": "apparel", "date": "2026-10-01", "value": "2500", "expect": "5" },
+    { "slab": "apparel", "date": "2026-10-01", "value": "2500.01", "expect": "18" },
+    { "slab": "apparel", "date": "2026-10-01", "value": "999", "expect": "5" },
+    { "slab": "apparel", "date": "2025-09-22", "value": "1800", "expect": "5" },
+    { "slab": "apparel", "date": "2025-09-21", "value": "1000", "expect": "5" },
+    { "slab": "apparel", "date": "2025-09-21", "value": "1000.01", "expect": "12" },
+    { "slab": "apparel", "date": "2024-04-01", "value": "1800", "expect": "12" },
+    { "slab": "footwear", "date": "2025-09-21", "value": "900", "expect": "12" },
+    { "slab": "footwear", "date": "2025-09-21", "value": "1500", "expect": "18" },
+    { "slab": "footwear", "date": "2026-10-01", "value": "2400", "expect": "5" },
+    { "slab": "footwear", "date": "2026-10-01", "value": "2600", "expect": "18" }
+  ],
+  "inclusive": [
+    { "slab": "apparel", "date": "2026-10-01", "price": "2600", "expect": "5" },
+    { "slab": "apparel", "date": "2026-10-01", "price": "2625", "expect": "5" },
+    { "slab": "apparel", "date": "2026-10-01", "price": "2625.01", "expect": "18" },
+    { "slab": "apparel", "date": "2026-10-01", "price": "3500", "expect": "18" },
+    { "slab": "apparel", "date": "2025-09-21", "price": "1050", "expect": "5" },
+    { "slab": "apparel", "date": "2025-09-21", "price": "1100", "expect": "12" }
+  ],
+  "ambiguous": [
+    { "slab": "apparel", "date": "2026-10-01", "price": "2600", "expect": false },
+    { "slab": "apparel", "date": "2026-10-01", "price": "2700", "expect": true },
+    { "slab": "apparel", "date": "2026-10-01", "price": "2950", "expect": true },
+    { "slab": "apparel", "date": "2026-10-01", "price": "2950.01", "expect": false }
+  ],
+  "lineRate": [
+    { "name": "no slab keeps the item rate", "item": { "gstRate": "12" }, "line": { "qty": "1", "rate": "5000" }, "date": "2026-10-01", "expect": "12" },
+    { "name": "discount brings a Rs 3,000 shirt under the line", "item": { "gstRate": "5", "gstSlab": "apparel" }, "line": { "qty": "2", "rate": "3000", "discount": "1200" }, "date": "2026-10-01", "expect": "5" },
+    { "name": "Rs 3,000 shirt without discount", "item": { "gstRate": "5", "gstSlab": "apparel" }, "line": { "qty": "2", "rate": "3000" }, "date": "2026-10-01", "expect": "18" },
+    { "name": "set of four counted per piece", "item": { "gstRate": "5", "gstSlab": "apparel", "slabPieces": 4 }, "line": { "qty": "1", "rate": "8000" }, "date": "2026-10-01", "expect": "5" },
+    { "name": "set of four counted as one piece", "item": { "gstRate": "5", "gstSlab": "apparel", "slabPieces": 1 }, "line": { "qty": "1", "rate": "8000" }, "date": "2026-10-01", "expect": "18" },
+    { "name": "MRP-inclusive tag back-calculated", "item": { "gstRate": "5", "gstSlab": "apparel" }, "line": { "qty": "1", "rate": "2600" }, "date": "2026-10-01", "inclusive": true, "expect": "5" },
+    { "name": "zero quantity tests the rate", "item": { "gstRate": "5", "gstSlab": "apparel" }, "line": { "qty": "0", "rate": "2700" }, "date": "2026-10-01", "expect": "18" }
+  ],
+  "posBill": [
+    {
+      "name": "bill discount moves one kurta under Rs 2,500",
+      "options": { "inclusive": true, "billDiscount": "600", "date": "2026-10-01" },
+      "lines": [
+        { "qty": "1", "price": "2600", "gstRate": "5", "gstSlab": "apparel" },
+        { "qty": "1", "price": "3200", "gstRate": "5", "gstSlab": "apparel" }
+      ],
+      "expectRates": ["5", "18"]
+    },
+    {
+      "name": "exclusive prices with a line discount",
+      "options": { "inclusive": false, "date": "2026-10-01" },
+      "lines": [
+        { "qty": "2", "price": "2800", "gstRate": "5", "gstSlab": "apparel", "discount": "700" },
+        { "qty": "1", "price": "1200", "gstRate": "18" }
+      ],
+      "expectRates": ["5", "18"]
+    }
+  ]
+}

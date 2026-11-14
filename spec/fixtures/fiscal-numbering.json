@@ -1,0 +1,18 @@
+{
+  "fiscalYear": [
+    { "date": "2026-03-31", "expect": { "start": "2025-04-01", "end": "2026-03-31", "label": "2025-26", "short": "25-26" } },
+    { "date": "2026-04-01", "expect": { "start": "2026-04-01", "end": "2027-03-31", "label": "2026-27", "short": "26-27" } },
+    { "date": "2000-01-15", "expect": { "start": "1999-04-01", "end": "2000-03-31", "label": "1999-00", "short": "99-00" } }
+  ],
+  "format": [
+    { "pattern": "INV/{FY}/{SEQ:4}", "parts": { "fyShort": "25-26", "fyLabel": "2025-26", "seq": 1 }, "expect": "INV/25-26/0001" },
+    { "pattern": "{DEV}/{FY}/{SEQ:5}", "parts": { "fyShort": "25-26", "fyLabel": "2025-26", "seq": 42, "device": "A1" }, "expect": "A1/25-26/00042" },
+    { "pattern": "SI-{SEQ}", "parts": { "fyShort": "25-26", "fyLabel": "2025-26", "seq": 12345 }, "expect": "SI-12345" }
+  ],
+  "seriesCheck": [
+    { "pattern": "INV/{FY}/{SEQ:5}", "expect": null },
+    { "pattern": "INVOICE/{FYL}/{SEQ:5}", "expect": "too_long" },
+    { "pattern": "INV {FY} {SEQ}", "expect": "bad_chars" },
+    { "pattern": "INV/{FY}", "expect": "empty" }
+  ]
+}

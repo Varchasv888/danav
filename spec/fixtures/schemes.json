@@ -1,0 +1,1380 @@
+{
+  "description": "Store schemes at billing (packages/domain/src/schemes.ts). Both packages/domain (TS) and the Flutter app (Dart) must produce exactly these outputs.",
+  "cases": [
+    {
+      "name": "flat 20% on shirts and jeans, socks left alone",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1799"
+        },
+        {
+          "itemId": "socks",
+          "qty": "3",
+          "price": "149"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Diwali 20%",
+          "kind": "percent",
+          "itemIds": [
+            "shirt",
+            "jeans"
+          ],
+          "pct": "20"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "399.60",
+          "359.80",
+          "0.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "Diwali 20%",
+            "discount": "759.40"
+          }
+        ]
+      }
+    },
+    {
+      "name": "percent needs a minimum bill value",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "999"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "10% above 2000",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10",
+          "minValue": "2000"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "scheme outside its dates does nothing",
+      "date": "2026-12-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "999"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "November only",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10",
+          "startsOn": "2026-11-01",
+          "endsOn": "2026-11-30"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "Rs 500 off a bill of Rs 3,000 or more, spread by value",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1799"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "500 off 3000",
+          "kind": "amount_off",
+          "itemIds": null,
+          "amount": "500",
+          "minValue": "3000"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "263.10",
+          "236.90"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "500 off 3000",
+            "discount": "500.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "buy 2 get 1 free: the cheapest of each three",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1799"
+        },
+        {
+          "itemId": "socks",
+          "qty": "4",
+          "price": "149"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Buy 2 get 1",
+          "kind": "buy_get",
+          "itemIds": null,
+          "buy": 2,
+          "get": 1,
+          "pct": "100"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "999.00",
+          "0.00",
+          "149.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "Buy 2 get 1",
+            "discount": "1148.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "buy 1 get 1 at half price",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "3",
+          "price": "800"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "B1G1 50%",
+          "kind": "buy_get",
+          "itemIds": [
+            "shirt"
+          ],
+          "buy": 1,
+          "get": 1,
+          "pct": "50"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "400.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "B1G1 50%",
+            "discount": "400.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "quantity slab: 3 or more pieces 15%, 5 or more 25%",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "socks",
+          "qty": "3",
+          "price": "149"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "More you buy",
+          "kind": "qty_slab",
+          "itemIds": null,
+          "slabs": [
+            {
+              "from": "5",
+              "pct": "25"
+            },
+            {
+              "from": "3",
+              "pct": "15"
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "499.50",
+          "111.75"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "More you buy",
+            "discount": "611.25"
+          }
+        ]
+      }
+    },
+    {
+      "name": "value slab under the first step gives nothing",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "belt",
+          "qty": "1",
+          "price": "900"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Spend more",
+          "kind": "value_slab",
+          "itemIds": null,
+          "slabs": [
+            {
+              "from": "2000",
+              "pct": "5"
+            },
+            {
+              "from": "5000",
+              "pct": "10"
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "combo: shirt and belt for Rs 1,500, twice",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "belt",
+          "qty": "3",
+          "price": "900"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Shirt + belt 1500",
+          "kind": "combo",
+          "itemIds": null,
+          "comboPrice": "1500",
+          "comboItems": [
+            {
+              "itemId": "shirt",
+              "qty": 1
+            },
+            {
+              "itemId": "belt",
+              "qty": 1
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "419.80",
+          "378.20"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "Shirt + belt 1500",
+            "discount": "798.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "the order that saves the customer most wins",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "2",
+          "price": "999"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1799"
+        },
+        {
+          "itemId": "socks",
+          "qty": "3",
+          "price": "149"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Socks 10%",
+          "kind": "percent",
+          "itemIds": [
+            "socks"
+          ],
+          "pct": "10"
+        },
+        {
+          "id": "s2",
+          "name": "Jeans 30%",
+          "kind": "percent",
+          "itemIds": [
+            "jeans"
+          ],
+          "pct": "30"
+        },
+        {
+          "id": "s3",
+          "name": "All 5%",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "5"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "99.90",
+          "539.70",
+          "44.70"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "Socks 10%",
+            "discount": "44.70"
+          },
+          {
+            "schemeId": "s2",
+            "name": "Jeans 30%",
+            "discount": "539.70"
+          },
+          {
+            "schemeId": "s3",
+            "name": "All 5%",
+            "discount": "99.90"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a line with its own discount takes no scheme",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "999",
+          "discount": "100"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1799"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "All 10%",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00",
+          "179.90"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "All 10%",
+            "discount": "179.90"
+          }
+        ]
+      }
+    },
+    {
+      "name": "loose goods by weight take a percent but no free pieces",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "rice",
+          "qty": "2.5",
+          "price": "60"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "Buy 1 get 1",
+          "kind": "buy_get",
+          "itemIds": null,
+          "buy": 1,
+          "get": 1,
+          "pct": "100"
+        },
+        {
+          "id": "s2",
+          "name": "Rice 10%",
+          "kind": "percent",
+          "itemIds": [
+            "rice"
+          ],
+          "pct": "10"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "15.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s2",
+            "name": "Rice 10%",
+            "discount": "15.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "with more than six schemes the biggest goes first",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "2000"
+        },
+        {
+          "itemId": "socks",
+          "qty": "2",
+          "price": "100"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "a",
+          "name": "Shirt 10%",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10"
+        },
+        {
+          "id": "b",
+          "name": "Shirt 15%",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "15"
+        },
+        {
+          "id": "c",
+          "name": "Jeans 5%",
+          "kind": "percent",
+          "itemIds": [
+            "jeans"
+          ],
+          "pct": "5"
+        },
+        {
+          "id": "d",
+          "name": "Jeans 12%",
+          "kind": "percent",
+          "itemIds": [
+            "jeans"
+          ],
+          "pct": "12"
+        },
+        {
+          "id": "e",
+          "name": "Socks 20%",
+          "kind": "percent",
+          "itemIds": [
+            "socks"
+          ],
+          "pct": "20"
+        },
+        {
+          "id": "f",
+          "name": "Socks B1G1",
+          "kind": "buy_get",
+          "itemIds": [
+            "socks"
+          ],
+          "buy": 1,
+          "get": 1,
+          "pct": "100"
+        },
+        {
+          "id": "g",
+          "name": "All 1%",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "1"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "150.00",
+          "240.00",
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "d",
+            "name": "Jeans 12%",
+            "discount": "240.00"
+          },
+          {
+            "schemeId": "b",
+            "name": "Shirt 15%",
+            "discount": "150.00"
+          },
+          {
+            "schemeId": "f",
+            "name": "Socks B1G1",
+            "discount": "100.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "weekday offer runs on its day (Saturday)",
+      "date": "2026-11-07",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "w1",
+          "name": "Saturday sale",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "weekdays": [
+            6
+          ]
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "w1",
+            "name": "Saturday sale",
+            "discount": "100.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "weekday offer does not run on another day (Wednesday)",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "w1",
+          "name": "Saturday sale",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "weekdays": [
+            6
+          ]
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "offer with hours runs inside them",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "h1",
+          "name": "Happy hour",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "h1",
+            "name": "Happy hour",
+            "discount": "100.00"
+          }
+        ]
+      },
+      "time": "18:30"
+    },
+    {
+      "name": "offer with hours starts at its start and ends before its end",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "h1",
+          "name": "Happy hour",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "h1",
+            "name": "Happy hour",
+            "discount": "100.00"
+          }
+        ]
+      },
+      "time": "17:00"
+    },
+    {
+      "name": "offer with hours does not run at its end time",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "h1",
+          "name": "Happy hour",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      },
+      "time": "21:00"
+    },
+    {
+      "name": "offer with hours does not run outside them",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "h1",
+          "name": "Happy hour",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      },
+      "time": "14:00"
+    },
+    {
+      "name": "offer with hours is not applied when the time is not known",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "h1",
+          "name": "Happy hour",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "overnight offer runs before midnight",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "n1",
+          "name": "Night owl",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "22:00",
+          "toTime": "02:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "n1",
+            "name": "Night owl",
+            "discount": "100.00"
+          }
+        ]
+      },
+      "time": "23:15"
+    },
+    {
+      "name": "overnight offer runs after midnight",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "n1",
+          "name": "Night owl",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "22:00",
+          "toTime": "02:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "n1",
+            "name": "Night owl",
+            "discount": "100.00"
+          }
+        ]
+      },
+      "time": "01:00"
+    },
+    {
+      "name": "overnight offer does not run in the day",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "n1",
+          "name": "Night owl",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "fromTime": "22:00",
+          "toTime": "02:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      },
+      "time": "03:00"
+    },
+    {
+      "name": "days and hours must both allow it: right day, right hour",
+      "date": "2026-11-08",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "b1",
+          "name": "Weekend evenings",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "weekdays": [
+            0,
+            6
+          ],
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "b1",
+            "name": "Weekend evenings",
+            "discount": "100.00"
+          }
+        ]
+      },
+      "time": "19:00"
+    },
+    {
+      "name": "days and hours must both allow it: right day, wrong hour",
+      "date": "2026-11-08",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "b1",
+          "name": "Weekend evenings",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "weekdays": [
+            0,
+            6
+          ],
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      },
+      "time": "12:00"
+    },
+    {
+      "name": "days and hours must both allow it: wrong day, right hour",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "b1",
+          "name": "Weekend evenings",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "weekdays": [
+            0,
+            6
+          ],
+          "fromTime": "17:00",
+          "toTime": "21:00"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      },
+      "time": "19:00"
+    },
+    {
+      "name": "without a rank the offer that saves most wins",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "p10",
+          "name": "Ten percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10"
+        },
+        {
+          "id": "p25",
+          "name": "Twenty five percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "25"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "250.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "p25",
+            "name": "Twenty five percent",
+            "discount": "250.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a ranked offer goes first even when another would save more",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "p10",
+          "name": "Ten percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "priority": 1
+        },
+        {
+          "id": "p25",
+          "name": "Twenty five percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "25"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "p10",
+            "name": "Ten percent",
+            "discount": "100.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ranks decide between ranked offers, lowest first",
+      "date": "2026-11-04",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "p10",
+          "name": "Ten percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "10",
+          "priority": 5
+        },
+        {
+          "id": "p25",
+          "name": "Twenty five percent",
+          "kind": "percent",
+          "itemIds": [
+            "shirt"
+          ],
+          "pct": "25",
+          "priority": 2
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "250.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "p25",
+            "name": "Twenty five percent",
+            "discount": "250.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a line already discounted takes no offer unless the offer says so",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000",
+          "discount": "100"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "10% off",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00",
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "10% off",
+            "discount": "100.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "an offer that applies on discounted lines works on what is left after their discount",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000",
+          "discount": "100"
+        },
+        {
+          "itemId": "jeans",
+          "qty": "1",
+          "price": "1000"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "10% off",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10",
+          "applyOnDiscounted": true
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "90.00",
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "10% off",
+            "discount": "190.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "a minimum stated with tax is reached only once the tax is counted, on tax-exclusive prices",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "900",
+          "taxRate": "12"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "1000 and over",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10",
+          "minValue": "1000",
+          "inclusiveOfTax": true
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "90.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "1000 and over",
+            "discount": "90.00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "the same minimum is not reached when the offer is not stated with tax",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "900",
+          "taxRate": "12"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "1000 and over",
+          "kind": "percent",
+          "itemIds": null,
+          "pct": "10",
+          "minValue": "1000"
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "0.00"
+        ],
+        "applied": []
+      }
+    },
+    {
+      "name": "a flat amount stated with tax comes off as the tax-exclusive equivalent",
+      "date": "2026-11-01",
+      "lines": [
+        {
+          "itemId": "shirt",
+          "qty": "1",
+          "price": "1000",
+          "taxRate": "12"
+        }
+      ],
+      "schemes": [
+        {
+          "id": "s1",
+          "name": "112 off",
+          "kind": "amount_off",
+          "itemIds": null,
+          "amount": "112",
+          "inclusiveOfTax": true
+        }
+      ],
+      "expect": {
+        "discounts": [
+          "100.00"
+        ],
+        "applied": [
+          {
+            "schemeId": "s1",
+            "name": "112 off",
+            "discount": "100.00"
+          }
+        ]
+      }
+    }
+  ]
+}

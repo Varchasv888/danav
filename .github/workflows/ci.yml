@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  typescript:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: varchasv_owner
+          POSTGRES_PASSWORD: varchasv_owner_dev
+          POSTGRES_DB: varchasv
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U varchasv_owner" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_OWNER_URL: postgres://varchasv_owner:varchasv_owner_dev@localhost:5433/varchasv
+      DATABASE_URL: postgres://varchasv_app:varchasv_app_dev@localhost:5433/varchasv
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Create the RLS-restricted app role
+        run: psql "$DATABASE_OWNER_URL" -v ON_ERROR_STOP=1 -f infra/postgres/init.sql
+      - run: npm run build -w @varchasv/domain -w @varchasv/db
+      - run: npm run db:migrate
+      - run: npm test -w @varchasv/domain
+      - run: npm test -w @varchasv/api
+      - run: npm run i18n:check
+      - run: npx tsc --noEmit -p apps/api
+      - run: npx tsc --noEmit -p apps/web
+      - name: API reference is up to date
+        run: npm run docs:api -w @varchasv/api && git diff --exit-code docs/api.md
+      - run: npm audit --omit=dev --audit-level=high
+      - name: Production builds
+        run: npx turbo run build --filter=@varchasv/web --filter=@varchasv/api
+      - name: Docker image builds
+        run: docker build -t varchasv-erp .
+
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/varchasv
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      # Includes the shared spec/fixtures, so the Dart rules must match the TypeScript ones.
+      - run: flutter test

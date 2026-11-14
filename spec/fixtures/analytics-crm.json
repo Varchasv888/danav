@@ -1,0 +1,30 @@
+{
+  "_comment": "Phase 8 rules: report schedules in Indian time, report periods, CSV, message templates and Indian mobile numbers. 1 Oct 2026 is a Thursday.",
+  "nextRun": [
+    { "name": "daily at 9, asked at 7:30 IST: today", "schedule": { "frequency": "daily", "hour": 9 }, "after": "2026-10-01T02:00:00.000Z", "expect": "2026-10-01T03:30:00.000Z" },
+    { "name": "daily at 9, asked exactly at 9: tomorrow", "schedule": { "frequency": "daily", "hour": 9 }, "after": "2026-10-01T03:30:00.000Z", "expect": "2026-10-02T03:30:00.000Z" },
+    { "name": "Mondays at 8, asked on a Thursday", "schedule": { "frequency": "weekly", "hour": 8, "weekday": 1 }, "after": "2026-10-01T00:00:00.000Z", "expect": "2026-10-05T02:30:00.000Z" },
+    { "name": "1st of the month at 7, asked at 7:30 on the 1st: next month", "schedule": { "frequency": "monthly", "hour": 7, "day": 1 }, "after": "2026-10-01T02:00:00.000Z", "expect": "2026-11-01T01:30:00.000Z" },
+    { "name": "midnight IST is 18:30 UTC the day before", "schedule": { "frequency": "daily", "hour": 0 }, "after": "2026-09-30T18:29:00.000Z", "expect": "2026-09-30T18:30:00.000Z" }
+  ],
+  "periods": [
+    { "name": "daily: yesterday", "frequency": "daily", "runAt": "2026-10-01T03:30:00.000Z", "expect": { "from": "2026-09-30", "to": "2026-09-30" } },
+    { "name": "daily at midnight IST: the day that just ended", "frequency": "daily", "runAt": "2026-09-30T18:30:00.000Z", "expect": { "from": "2026-09-30", "to": "2026-09-30" } },
+    { "name": "weekly on a Monday: last Monday to Sunday", "frequency": "weekly", "runAt": "2026-10-05T02:30:00.000Z", "expect": { "from": "2026-09-28", "to": "2026-10-04" } },
+    { "name": "monthly: last month", "frequency": "monthly", "runAt": "2026-11-01T01:30:00.000Z", "expect": { "from": "2026-10-01", "to": "2026-10-31" } }
+  ],
+  "csv": {
+    "rows": [["Name", "Amount"], ["=HYPERLINK(\"x\")", -250], ["Sharma, Traders", "-12"], ["-Discount", null]],
+    "expect": "Name,Amount\r\n\"'=HYPERLINK(\"\"x\"\")\",-250\r\n\"Sharma, Traders\",-12\r\n'-Discount,\r\n"
+  },
+  "templates": {
+    "body": "Dear {{1}}, ₹{{2}} is due on {{3}}. — {{4}}",
+    "values": ["Asha", "12,500.00", "15 Oct", "Shree Traders"],
+    "expect": "Dear Asha, ₹12,500.00 is due on 15 Oct. — Shree Traders",
+    "params": [1, 2, 3, 4]
+  },
+  "phones": [
+    ["+91 98765-43210", "919876543210"], ["098765 43210", "919876543210"], ["9876543210", "919876543210"], ["919876543210", "919876543210"],
+    ["12345", null], ["5876543210", null], ["0919876543210", null]
+  ]
+}

@@ -1,0 +1,29 @@
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+*.log
+.env
+.env.*.local
+# Flutter
+apps/varchasv/.dart_tool/
+apps/varchasv/build/
+apps/varchasv/.flutter-plugins*
+
+# Database backups (npm run db:backup)
+backups/
+
+# Vercel CLI links
+.vercel/
+
+# Local knowledge graph (graphify)
+graphify-out/
+
+.env*
+!.env.example
+
+# Agent skills the Vercel/Neon CLI installs locally
+.agents/
+.claude/skills/
+skills-lock.json

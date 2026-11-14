@@ -1,0 +1,16 @@
+{
+  "cases": [
+    { "name": "sales invoice posting balances", "lines": [
+        { "accountId": "debtors", "debit": "1180.00" },
+        { "accountId": "sales", "credit": "1000.00" },
+        { "accountId": "output-cgst", "credit": "90.00" },
+        { "accountId": "output-sgst", "credit": "90.00" }], "expectErrors": [] },
+    { "name": "unbalanced by one paisa", "lines": [
+        { "accountId": "cash", "debit": "100.00" },
+        { "accountId": "sales", "credit": "99.99" }], "expectErrors": ["unbalanced"] },
+    { "name": "line with both sides and a zero line", "lines": [
+        { "accountId": "cash", "debit": "10", "credit": "10" },
+        { "accountId": "sales", "credit": "0" }], "expectErrors": ["both_sides", "zero_line"] },
+    { "name": "single line", "lines": [{ "accountId": "cash", "debit": "10" }], "expectErrors": ["too_few_lines", "unbalanced"] }
+  ]
+}

@@ -1,0 +1,1 @@
+ALTER TABLE "gst_settings" ADD COLUMN "print_language" varchar(5) DEFAULT 'hi' NOT NULL;

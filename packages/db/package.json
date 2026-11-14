@@ -1,0 +1,24 @@
+{
+  "name": "@varchasv/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Postgres schema (Drizzle), migrations with row-level security, and seed data.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx src/migrate.ts"
+  },
+  "dependencies": {
+    "@varchasv/domain": "0.1.0",
+    "drizzle-orm": "^0.45.3",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11"
+  }
+}

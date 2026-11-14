@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "cd ../.. && npx turbo run build --filter=@varchasv/web",
+  "outputDirectory": "apps/web/.next",
+  "regions": ["sin1"],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
