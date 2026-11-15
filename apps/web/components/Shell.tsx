@@ -226,7 +226,7 @@ export function Shell({ userName, tenantId, tenants, permissions, children }: Sh
             ) : null}
           </div>
         ) : null}
-        <div className="flex items-center gap-1 max-lg:hidden"><LanguageSwitch signedIn /><span className="max-2xl:hidden"><ThemeSwitch /></span></div>
+        <div className="flex items-center gap-1 max-lg:hidden"><LanguageSwitch signedIn /><ThemeSwitch /></div>
         <Link href="/assistant" className={clsx(shellButton, "max-sm:hidden")} title={t("nav.assistant")}>
           <Sparkles className="size-4" aria-hidden /><span className="hidden xl:inline">{t("nav.assistant")}</span>
         </Link>

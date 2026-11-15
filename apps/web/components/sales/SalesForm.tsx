@@ -59,7 +59,43 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
   const router = useRouter();
   const { toast } = useToast();
   const [customerId, setCustomerId] = useState(initial?.customerId ?? "");
-  const customer = customers.find((c) => c.id === customerId);
+  const [customerList, setCustomerList] = useState(customers);
+  const [newCustomerOpen, setNewCustomerOpen] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState("");
+  const [newCustomerPhone, setNewCustomerPhone] = useState("");
+  const [newCustomerGstin, setNewCustomerGstin] = useState("");
+  const [newCustomerState, setNewCustomerState] = useState("");
+  const [customerSaving, setCustomerSaving] = useState(false);
+  const [customerError, setCustomerError] = useState("");
+  const [canCreateCustomer, setCanCreateCustomer] = useState(false);
+  useEffect(() => {
+    if (mode !== "invoice") return;
+    api<{ id: string; key: string | null }[]>("/accounts/groups")
+      .then((groups) => { setDebtorGroupId(groups.find((g) => g.key === "sundry_debtors")?.id ?? ""); setCanCreateCustomer(true); })
+      .catch(() => setCanCreateCustomer(false));
+  }, [mode]);
+  const [debtorGroupId, setDebtorGroupId] = useState("");
+  async function createCustomer() {
+    if (!debtorGroupId || !newCustomerName.trim() || customerSaving) return;
+    setCustomerSaving(true);
+    setCustomerError("");
+    try {
+      const created = await api<CustomerOption>("/accounts", { body: {
+        name: newCustomerName.trim(), groupId: debtorGroupId,
+        ...(newCustomerPhone.trim() ? { phone: newCustomerPhone.trim() } : {}),
+        ...(newCustomerGstin.trim() ? { gstin: newCustomerGstin.trim().toUpperCase() } : {}),
+        ...(newCustomerState ? { stateCode: newCustomerState } : {}),
+      } });
+      setCustomerList((list) => [...list, created]);
+      setCustomerId(created.id);
+      setPos("");
+      setNewCustomerOpen(false);
+      setNewCustomerName(""); setNewCustomerPhone(""); setNewCustomerGstin(""); setNewCustomerState("");
+    } catch (err) {
+      setCustomerError(err instanceof ApiError ? (err.issues?.[0]?.message ?? err.code) : "Unable to create customer. Check your permissions and details.");
+    } finally { setCustomerSaving(false); }
+  }
+  const customer = customerList.find((c) => c.id === customerId);
   const [pos, setPos] = useState<string>(initial?.supply?.export ? "" : initial?.supply?.placeOfSupply ?? "");
   const [exportSale, setExportSale] = useState(!!initial?.supply?.export);
   const [sez, setSez] = useState(!!initial?.supply?.sez);
@@ -118,7 +154,7 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
     api<{ balance: string; overdue: string; advance: string }>(`/customers/${customerId}/balance`).then(setBalance).catch(() => setBalance(null));
   }, [customerId]);
   const chooseCustomer = (id: string) => {
-    const c = customers.find((x) => x.id === id);
+    const c = customerList.find((x) => x.id === id);
     setCustomerId(id);
     setPos("");
     setAgentId(c?.agentId ?? "");
@@ -174,7 +210,7 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
       reason = (window.prompt(t("sales.overrideReasonPrompt")) ?? "").trim();
       if (reason.length < 3) return;
     }
-    if (busy || !customerId || !valid.length) return;
+    if (busy || (mode !== "invoice" && !customerId) || !valid.length) return;
     // A window opened now, while the click still counts, can be pointed at the print page once the invoice exists.
     const printWin = then === "print" ? window.open("about:blank", "_blank") : null;
     setBusy(true);
@@ -194,7 +230,7 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
     try {
       const doc = await api<{ id: string; number?: string; warnings?: { code: string; lineNo?: number; detail?: string }[] }>(ENDPOINT[mode], {
         body: {
-          customerId, date, supply, narration: narration || undefined, lines: payloadLines, ...(overrideCredit ? { overrideCredit: true, overrideReason: reason } : {}),
+          ...(customerId ? { customerId } : {}), date, supply, narration: narration || undefined, lines: payloadLines, ...(overrideCredit ? { overrideCredit: true, overrideReason: reason } : {}),
           ...(quoteLike ? { validUntil } : { quotationId: initial?.quotationId }),
           ...(mode === "proforma" ? { kind: "proforma", advanceDue: advanceDue || undefined } : {}),
           ...(mode === "invoice" ? { dueOn: dueOn || undefined, orderId: initial?.orderId, ...(Number(cartons) > 0 ? { cartons: Number(cartons) } : {}), ...shipping,
@@ -226,7 +262,7 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
   }
 
   const defaultWh = warehouses.find((w) => w.isDefault)?.id ?? warehouses[0]?.id;
-  const customerOptions = useMemo<ComboOption[]>(() => customers.map((c) => ({ value: c.id, label: localName(c, locale), ...(c.gstin ? { sub: c.gstin } : {}) })), [customers, locale]);
+  const customerOptions = useMemo<ComboOption[]>(() => customerList.map((c) => ({ value: c.id, label: localName(c, locale), ...(c.gstin ? { sub: c.gstin } : {}) })), [customerList, locale]);
   const itemOptions = useMemo<ComboOption[]>(() => sorted.map((it) => ({
     value: it.id, label: localName(it, locale), ...([it.size, it.color].filter(Boolean).length ? { sub: [it.size, it.color].filter(Boolean).join(" / ") } : {}),
     ...(it.kind === "goods" ? { right: `${Number(it.stockQty).toLocaleString("en-IN")} ${it.uom}` } : {}),
@@ -342,8 +378,36 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
         {/* Party block: the customer, what they owe, their address and where the goods go. */}
         <div className="grid shrink-0 grid-cols-1 gap-x-4 gap-y-2 border-b border-border px-3 py-2 md:grid-cols-[minmax(16rem,1.2fr)_1.4fr_1.2fr]">
           <Field label={t("sales.customer")} htmlFor="s-customer">
-            <Combobox id="s-customer" value={customerId} onValueChange={(v) => chooseCustomer(v)} options={customerOptions} placeholder={t("sales.chooseCustomer")} disabled={!!initial?.customerId}
+            {mode === "invoice" && !initial?.customerId ? (
+              <div className="mb-1 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-muted">No customer selected = Walk-in Retail Customer</span>
+                <button type="button" onClick={() => setNewCustomerOpen((open) => !open)} className="font-semibold text-primary hover:underline">
+                  <Plus className="mr-1 inline size-3" />New customer
+                </button>
+              </div>
+            ) : null}
+            <Combobox id="s-customer" value={customerId} onValueChange={(v) => chooseCustomer(v)} options={customerOptions} placeholder={mode === "invoice" ? "Walk-in Retail Customer (optional)" : t("sales.chooseCustomer")} disabled={!!initial?.customerId}
               labels={{ empty: t("common.nothingFound"), clear: t("common.clear") }} />
+            {mode === "invoice" && newCustomerOpen ? (
+              <div className="mt-2 rounded-lg border border-border bg-surface-2 p-3">
+                <p className="mb-2 text-sm font-semibold">Create customer during billing</p>
+                <div className="grid gap-2">
+                  <Input value={newCustomerName} onChange={(e) => setNewCustomerName(e.target.value)} placeholder="Customer name *" aria-label="Customer name" maxLength={120} />
+                  <Input value={newCustomerPhone} onChange={(e) => setNewCustomerPhone(e.target.value)} placeholder="Mobile number (optional)" aria-label="Customer mobile" maxLength={15} />
+                  <Input value={newCustomerGstin} onChange={(e) => setNewCustomerGstin(e.target.value)} placeholder="GSTIN (optional)" aria-label="Customer GSTIN" maxLength={15} />
+                  <Select aria-label="Customer state" value={newCustomerState} onChange={(e) => setNewCustomerState(e.target.value)}>
+                    <option value="">Use default state</option>
+                    {GST_STATES.map((state) => <option key={state.code} value={state.code}>{state.name}</option>)}
+                  </Select>
+                  {customerError ? <p role="alert" className="text-xs text-danger">{customerError}</p> : null}
+                  {!canCreateCustomer ? <p className="text-xs text-muted">Customer creation needs Accounts access.</p> : null}
+                  <div className="flex gap-2">
+                    <Button type="button" size="sm" disabled={customerSaving || !debtorGroupId || !newCustomerName.trim()} onClick={() => void createCustomer()}> {customerSaving ? "Saving..." : "Save customer"}</Button>
+                    <Button type="button" size="sm" variant="outline" onClick={() => setNewCustomerOpen(false)}>Cancel</Button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </Field>
           <div className="min-w-0 self-end pb-0.5 text-sm">
             {customer ? (
@@ -501,9 +565,9 @@ export function SalesForm({ mode, customers, items, warehouses, homeState, initi
       {/* Sticky action bar. */}
       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 max-lg:sticky max-lg:bottom-[calc(3.5rem+env(safe-area-inset-bottom))] max-lg:z-30 max-lg:-mx-4 max-lg:border-t max-lg:border-border-strong max-lg:bg-surface max-lg:px-4 max-lg:py-2.5">
         <Button type="button" variant="ghost" onClick={cancel}>{t("common.cancel")}<kbd>Esc</kbd></Button>
-        {mode === "invoice" ? <Button type="button" variant="outline" disabled={busy || !customerId || !valid.length} onClick={() => void send(false, "print")}>{t("sales.saveAndPrint")}<kbd>Ctrl+P</kbd></Button> : null}
-        {mode === "invoice" ? <Button type="button" variant="outline" disabled={busy || !customerId || !valid.length} onClick={() => void send(false, "new")}>{t("sales.saveAndNew")}<kbd>Ctrl+Enter</kbd></Button> : null}
-        <Button type="submit" loading={busy} disabled={!customerId || !valid.length}>{mode === "quotation" ? t("sales.quotations.save") : mode === "proforma" ? t("sales.proformas.save") : mode === "order" ? t("sales.orders.new") : t("sales.invoices.post")}<kbd>Ctrl+S</kbd></Button>
+        {mode === "invoice" ? <Button type="button" variant="outline" disabled={busy || (mode !== "invoice" && !customerId) || !valid.length} onClick={() => void send(false, "print")}>{t("sales.saveAndPrint")}<kbd>Ctrl+P</kbd></Button> : null}
+        {mode === "invoice" ? <Button type="button" variant="outline" disabled={busy || (mode !== "invoice" && !customerId) || !valid.length} onClick={() => void send(false, "new")}>{t("sales.saveAndNew")}<kbd>Ctrl+Enter</kbd></Button> : null}
+        <Button type="submit" loading={busy} disabled={(mode !== "invoice" && !customerId) || !valid.length}>{mode === "quotation" ? t("sales.quotations.save") : mode === "proforma" ? t("sales.proformas.save") : mode === "order" ? t("sales.orders.new") : t("sales.invoices.post")}<kbd>Ctrl+S</kbd></Button>
       </div>
 
       {drawer ? (

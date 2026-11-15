@@ -1,6 +1,6 @@
 import { assertNotBelowCost } from "../lib/rights.js";
 import { assertDateRight, recordPrint } from "../lib/rights.js";
-import { and, asc, desc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { outstanding } from "../services/returns.js";
@@ -8,7 +8,7 @@ import { tables, withTenant, type Db } from "@varchasv/db";
 import { isValidStateCode, businessDate } from "@varchasv/domain";
 import { forbidden, notFound } from "../lib/errors.js";
 import { can, requireTenant } from "../plugins/auth.js";
-import { fiscalYearForDate, peekNumber, resolveCompany } from "../services/accounting.js";
+import { ensureChart, fiscalYearForDate, peekNumber, resolveCompany } from "../services/accounting.js";
 import { salesFlow } from "../services/salesflow.js";
 import { backorders, orderReservations, releaseOrder, reserveOrder } from "../services/reservations.js";
 import { closeClaim, deliveryExceptions, getProof, recordProof } from "../services/deliveryproof.js";
@@ -306,7 +306,7 @@ export async function salesRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post("/sales-invoices", { preHandler: can("sales.create") }, async (req, reply) => {
     const auth = requireTenant(req);
     const body = z.object({
-      companyId: z.uuid().optional(), branchId: z.uuid().optional(), customerId: z.uuid(), orderId: z.uuid().optional(), quotationId: z.uuid().optional(), projectId: z.uuid().optional(),
+      companyId: z.uuid().optional(), branchId: z.uuid().optional(), customerId: z.uuid().optional(), orderId: z.uuid().optional(), quotationId: z.uuid().optional(), projectId: z.uuid().optional(),
       date: IsoDate, dueOn: IsoDate.optional(),
       supply: Supply, narration: z.string().max(300).optional(), cartons: z.number().int().min(1).max(100000).optional(),
       transporter: z.string().trim().max(80).optional(), vehicleNo: z.string().trim().toUpperCase().regex(/^[A-Z0-9 -]{4,15}$/, "invalid_vehicle").optional(),
@@ -321,7 +321,31 @@ export async function salesRoutes(app: FastifyInstance, { db }: { db: Db }) {
     }).parse(req.body);
     assertDateRight(auth, body.date);
     mayOverride(auth, body);
-    const r = await withTenant(db, auth.tenantId, async (tx) => { await assertNotBelowCost(tx, auth, body.lines); return createSalesInvoice(tx, actor(auth, req.ip), body); });
+    const r = await withTenant(db, auth.tenantId, async (tx) => {
+      await assertNotBelowCost(tx, auth, body.lines);
+      // A walk-in retail sale still needs an accounts-receivable ledger for valid GL posting.
+      // Linked orders/quotations must always retain their original customer.
+      if (!body.customerId) {
+        if (body.orderId || body.quotationId || body.projectId) throw forbidden("customer_required_for_linked_invoice");
+        const company = await resolveCompany(tx, body.companyId);
+        await ensureChart(tx, auth.tenantId, company.id);
+        const [group] = await tx.select({ id: tables.accountGroups.id }).from(tables.accountGroups)
+          .where(and(eq(tables.accountGroups.companyId, company.id), eq(tables.accountGroups.key, "sundry_debtors")));
+        if (!group) throw notFound("debtors_group_not_found");
+        // Serialize creation within this company to avoid duplicate walk-in ledgers on busy counters.
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`walkin:${company.id}`}))`);
+        let [walkIn] = await tx.select({ id: tables.accounts.id }).from(tables.accounts)
+          .where(and(eq(tables.accounts.companyId, company.id), eq(tables.accounts.key, "retail_walk_in")));
+        if (!walkIn) {
+          [walkIn] = await tx.insert(tables.accounts).values({
+            tenantId: auth.tenantId, companyId: company.id, groupId: group.id,
+            key: "retail_walk_in", name: "Walk-in Retail Customer", system: true,
+          }).returning({ id: tables.accounts.id });
+        }
+        body.customerId = walkIn!.id;
+      }
+      return createSalesInvoice(tx, actor(auth, req.ip), body as Parameters<typeof createSalesInvoice>[2]);
+    });
     return reply.code(201).send({ ...r.invoice, warnings: r.warnings });
   });
   app.post("/sales-invoices/:id/cancel", { preHandler: can("sales.cancel") }, async (req) => {

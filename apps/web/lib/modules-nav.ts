@@ -128,7 +128,7 @@ export const moduleTitle = (key: string) => MODULE_TITLES[key] ?? key;
 const RAIL_TITLES: Record<string, string> = { finance: "Planning", admin: "Admin" };
 export const railTitle = (key: string) => RAIL_TITLES[key] ?? moduleTitle(key);
 const LETTERS: Record<string, string> = { workspace: "H", masters: "M", inventory: "I", procurement: "P", sales: "S", accounting: "A", gst: "G", crm: "C", finance: "F", admin: "D", reports: "R", utilities: "U" };
-const ORDER = ["inventory", "procurement", "sales", "accounting", "reports", "utilities"];
+const ORDER = ["masters", "inventory", "procurement", "sales", "accounting", "reports", "utilities"];
 
 /** Sections folded into another one (a name) or hidden for now (null). */
 const FOLDED: Record<string, string | null> = { compliance: "accounting", people: "admin", analytics: "finance", manufacturing: null, projects: null };
